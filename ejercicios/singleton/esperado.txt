@@ -1,0 +1,4 @@
+Mismo objeto: true
+entorno=produccion
+Instancias distintas vistas por 10 hilos: 1
+Veces que se ejecutó el constructor: 1

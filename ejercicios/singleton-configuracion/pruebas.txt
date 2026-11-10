@@ -1,0 +1,20 @@
+### PRUEBA
+ConfiguracionSistema configuracion1 = ConfiguracionSistema.getInstancia();
+System.out.println("Idioma inicial: " + configuracion1.getIdioma());
+### ESPERADO
+Idioma inicial: Español
+### PRUEBA
+ConfiguracionSistema configuracion1 = ConfiguracionSistema.getInstancia();
+ConfiguracionSistema configuracion2 = ConfiguracionSistema.getInstancia();
+System.out.println("Misma instancia: " + (configuracion1 == configuracion2));
+### ESPERADO
+Misma instancia: true
+### PRUEBA
+ConfiguracionSistema configuracion1 = ConfiguracionSistema.getInstancia();
+ConfiguracionSistema configuracion2 = ConfiguracionSistema.getInstancia();
+configuracion1.setIdioma("Inglés");
+System.out.println("Idioma desde configuración 1: " + configuracion1.getIdioma());
+System.out.println("Idioma desde configuración 2: " + configuracion2.getIdioma());
+### ESPERADO
+Idioma desde configuración 1: Inglés
+Idioma desde configuración 2: Inglés

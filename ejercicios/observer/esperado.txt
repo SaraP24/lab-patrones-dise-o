@@ -1,0 +1,7 @@
+Pantalla[Móvil]: 25.0 °C
+Pantalla[Web]: 25.0 °C
+Pantalla[Móvil]: 32.5 °C
+Pantalla[Web]: 32.5 °C
+¡ALERTA! Temperatura alta: 32.5 °C
+-- Web se da de baja --
+Pantalla[Móvil]: 28.0 °C

@@ -1,0 +1,24 @@
+### PRUEBA
+Pedido pedido = new Pedido(3, new EnvioEstandar());
+System.out.println("Estándar: " + pedido.costoEnvio());
+### ESPERADO
+Estándar: 160
+### PRUEBA
+Pedido pedido = new Pedido(3, new EnvioExpress());
+System.out.println("Express: " + pedido.costoEnvio());
+### ESPERADO
+Express: 355
+### PRUEBA
+Pedido pedido = new Pedido(10, new EnvioEstandar());
+System.out.println("Antes: " + pedido.costoEnvio());
+pedido.setEstrategia(new RetiroEnLocal());
+System.out.println("Después: " + pedido.costoEnvio());
+### ESPERADO
+Antes: 300
+Después: 0
+### PRUEBA
+Pedido pedido = new Pedido(5, new EnvioEstandar());
+pedido.setEstrategia(peso -> 50);
+System.out.println("Tarifa plana (lambda): " + pedido.costoEnvio());
+### ESPERADO
+Tarifa plana (lambda): 50

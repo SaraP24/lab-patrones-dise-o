@@ -1,0 +1,56 @@
+### PRUEBA
+// Caso 1: Usuario con permiso para ver el documento
+Documento documento1 = new Documento("Este es el contenido del documento.");
+ProxyDocumento proxy1 = new ProxyDocumento(documento1, true);
+proxy1.verContenido();
+### ESPERADO
+Contenido del documento: Este es el contenido del documento.
+### PRUEBA
+// Caso 2: Usuario sin permiso para ver el documento
+Documento documento2 = new Documento("Contenido privado.");
+ProxyDocumento proxy2 = new ProxyDocumento(documento2, false);
+proxy2.verContenido();
+### ESPERADO
+Acceso denegado. No tienes permiso para ver este documento.
+### PRUEBA
+// Caso 3: Documento con contenido vacío y usuario con permiso
+Documento documento3 = new Documento("");
+ProxyDocumento proxy3 = new ProxyDocumento(documento3, true);
+proxy3.verContenido();
+### ESPERADO
+Contenido del documento:
+### PRUEBA
+// Caso 4: Documento con contenido vacío y usuario sin permiso
+Documento documento4 = new Documento("");
+ProxyDocumento proxy4 = new ProxyDocumento(documento4, false);
+proxy4.verContenido();
+### ESPERADO
+Acceso denegado. No tienes permiso para ver este documento.
+### PRUEBA
+// Caso 5: Documento con texto largo y usuario con permiso
+Documento documento5 = new Documento("Este es un documento largo que contiene mucha información que debe ser visible para el usuario autorizado.");
+ProxyDocumento proxy5 = new ProxyDocumento(documento5, true);
+proxy5.verContenido();
+### ESPERADO
+Contenido del documento: Este es un documento largo que contiene mucha información que debe ser visible para el usuario autorizado.
+### PRUEBA
+// Caso 6: Documento con texto largo y usuario sin permiso
+Documento documento6 = new Documento("Este es un documento largo que contiene mucha información que debe ser visible para el usuario autorizado.");
+ProxyDocumento proxy6 = new ProxyDocumento(documento6, false);
+proxy6.verContenido();
+### ESPERADO
+Acceso denegado. No tienes permiso para ver este documento.
+### PRUEBA
+// Caso 7: Documento con texto especial y usuario con permiso
+Documento documento7 = new Documento("Contenido con caracteres especiales: @#$%^&*()");
+ProxyDocumento proxy7 = new ProxyDocumento(documento7, true);
+proxy7.verContenido();
+### ESPERADO
+Contenido del documento: Contenido con caracteres especiales: @#$%^&*()
+### PRUEBA
+// Caso 8: Documento con texto especial y usuario sin permiso
+Documento documento8 = new Documento("Contenido con caracteres especiales: @#$%^&*()");
+ProxyDocumento proxy8 = new ProxyDocumento(documento8, false);
+proxy8.verContenido();
+### ESPERADO
+Acceso denegado. No tienes permiso para ver este documento.

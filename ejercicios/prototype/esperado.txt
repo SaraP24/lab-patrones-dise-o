@@ -1,0 +1,7 @@
+Original: Círculo r=10 color=rojo etiquetas=[base]
+Copia: Círculo r=10 color=rojo etiquetas=[base]
+¿Mismo objeto? false
+Copia modificada: Círculo r=25 color=azul etiquetas=[base, copia]
+Original intacto: Círculo r=10 color=rojo etiquetas=[base]
+Desde registro: Rectángulo 4x2 color=verde
+¿Dos clones distintos? true

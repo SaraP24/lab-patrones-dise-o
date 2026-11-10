@@ -1,0 +1,3 @@
+Entrega planificada: Camión entrega por carretera
+Entrega planificada: Barco entrega por mar en contenedor
+Entrega planificada: Avión entrega por aire

@@ -1,0 +1,26 @@
+### PRUEBA
+Comedor comedor = new Comedor(new FabricaModerna());
+comedor.amueblar();
+### ESPERADO
+Mesa: Mesa moderna de vidrio
+Silla: Silla moderna de metal
+### PRUEBA
+Comedor comedor = new Comedor(new FabricaVictoriana());
+comedor.amueblar();
+### ESPERADO
+Mesa: Mesa victoriana de roble
+Silla: Silla victoriana de madera tallada
+### PRUEBA
+FabricaMuebles fabrica = new FabricaVictoriana();
+System.out.println(fabrica.crearSilla().getClass().getSimpleName());
+System.out.println(fabrica.crearMesa().getClass().getSimpleName());
+### ESPERADO
+SillaVictoriana
+MesaVictoriana
+### PRUEBA
+FabricaMuebles fabrica = new FabricaModerna();
+Silla a = fabrica.crearSilla();
+Silla b = fabrica.crearSilla();
+System.out.println("¿Objetos nuevos en cada llamada? " + (a != b));
+### ESPERADO
+¿Objetos nuevos en cada llamada? true

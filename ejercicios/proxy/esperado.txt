@@ -1,0 +1,7 @@
+Galería con 3 imágenes (cargas reales: 0)
+Cargando playa.jpg desde disco...
+Mostrando playa.jpg
+Mostrando playa.jpg
+Cargando montaña.jpg desde disco...
+Mostrando montaña.jpg
+Cargas reales: 2

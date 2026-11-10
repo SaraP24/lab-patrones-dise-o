@@ -1,0 +1,30 @@
+### PRUEBA
+int[] valores = {60, 100, 120};
+int[] pesos = {10, 20, 30};
+System.out.println(Mochila.mochila(valores, pesos, 50, valores.length));
+### ESPERADO
+220
+### PRUEBA
+int[] valores = {10, 20, 30};
+int[] pesos = {1, 1, 1};
+System.out.println(Mochila.mochila(valores, pesos, 2, valores.length));
+### ESPERADO
+50
+### PRUEBA
+int[] valores = {40, 70};
+int[] pesos = {3, 5};
+System.out.println(Mochila.mochila(valores, pesos, 0, valores.length));
+### ESPERADO
+0
+### PRUEBA
+int[] valores = {50, 70};
+int[] pesos = {6, 4};
+System.out.println(Mochila.mochila(valores, pesos, 5, valores.length));
+### ESPERADO
+70
+### PRUEBA
+int[] valores = {30, 50, 80};
+int[] pesos = {6, 7, 9};
+System.out.println(Mochila.mochila(valores, pesos, 5, valores.length));
+### ESPERADO
+0

@@ -1,0 +1,12 @@
+### PRUEBA
+EnchufeAmericano enchufeAmericano = new EnchufeAmericano();
+EnchufeEuropeo adaptador = new Adaptador(enchufeAmericano);
+adaptador.conectarEnchufeEuropeo();
+### ESPERADO
+Enchufe americano conectado.
+Usando un adaptador europeo.
+### PRUEBA
+EnchufeAmericano enchufeAmericano = new EnchufeAmericano();
+enchufeAmericano.conectarEnchufeAmericano();
+### ESPERADO
+Enchufe americano conectado.

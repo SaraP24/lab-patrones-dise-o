@@ -1,0 +1,31 @@
+### PRUEBA
+Luces luces = new Luces();
+Proyector proyector = new Proyector();
+AireAcondicionado aire = new AireAcondicionado();
+AulaFacade aula = new AulaFacade(luces, proyector, aire);
+aula.iniciarClase();
+System.out.println("--- Clase en desarrollo ---");
+### ESPERADO
+Preparando el aula...
+Luces encendidas
+Proyector encendido
+Aire acondicionado encendido
+--- Clase en desarrollo ---
+### PRUEBA
+Luces luces = new Luces();
+Proyector proyector = new Proyector();
+AireAcondicionado aire = new AireAcondicionado();
+AulaFacade aula = new AulaFacade(luces, proyector, aire);
+aula.iniciarClase();
+System.out.println("--- Clase en desarrollo ---");
+aula.finalizarClase();
+### ESPERADO
+Preparando el aula...
+Luces encendidas
+Proyector encendido
+Aire acondicionado encendido
+--- Clase en desarrollo ---
+Cerrando el aula...
+Luces apagadas
+Proyector apagado
+Aire acondicionado apagado

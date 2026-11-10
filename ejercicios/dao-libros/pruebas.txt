@@ -1,0 +1,40 @@
+### PRUEBA
+LibroDAO dao = new LibroDAOMemoria();
+dao.agregar(new Libro("111", "Rayuela", "Julio Cortázar"));
+dao.agregar(new Libro("222", "La tregua", "Mario Benedetti"));
+for (Libro l : dao.listarTodos()) {
+    System.out.println(l);
+}
+### ESPERADO
+Libro [isbn=111, titulo=Rayuela, autor=Julio Cortázar]
+Libro [isbn=222, titulo=La tregua, autor=Mario Benedetti]
+### PRUEBA
+LibroDAO dao = new LibroDAOMemoria();
+dao.agregar(new Libro("222", "La tregua", "Mario Benedetti"));
+System.out.println("Buscar 222: " + dao.buscarPorIsbn("222"));
+Libro noExiste = dao.buscarPorIsbn("999");
+System.out.println("Buscar 999: " + (noExiste == null ? "no encontrado" : noExiste));
+### ESPERADO
+Buscar 222: Libro [isbn=222, titulo=La tregua, autor=Mario Benedetti]
+Buscar 999: no encontrado
+### PRUEBA
+LibroDAO dao = new LibroDAOMemoria();
+System.out.println("Primero: " + dao.agregar(new Libro("111", "Rayuela", "Julio Cortázar")));
+System.out.println("Repetido: " + dao.agregar(new Libro("111", "Otro título", "Otro autor")));
+System.out.println("Total: " + dao.listarTodos().size());
+### ESPERADO
+Primero: true
+Repetido: false
+Total: 1
+### PRUEBA
+LibroDAO dao = new LibroDAOMemoria();
+dao.agregar(new Libro("111", "Rayuela", "Julio Cortázar"));
+dao.agregar(new Libro("333", "Ficciones", "Jorge Luis Borges"));
+System.out.println("Eliminar 111: " + dao.eliminar("111"));
+System.out.println("Eliminar 111 otra vez: " + dao.eliminar("111"));
+dao.listarTodos().clear();
+System.out.println("Total tras limpiar la copia: " + dao.listarTodos().size());
+### ESPERADO
+Eliminar 111: true
+Eliminar 111 otra vez: false
+Total tras limpiar la copia: 1

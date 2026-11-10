@@ -1,0 +1,3 @@
+Pizza[tamaño=grande, masa=fina, ingredientes=[jamón, champiñones], extraQueso=true]
+Pizza[tamaño=mediana, masa=normal, ingredientes=[], extraQueso=false]
+Error: tamaño no válido: gigante

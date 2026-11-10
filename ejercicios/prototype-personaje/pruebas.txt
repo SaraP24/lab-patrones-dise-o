@@ -1,0 +1,32 @@
+### PRUEBA
+Personaje original = new Personaje("Guerrero", 10);
+original.agregarHabilidad("Espada");
+Personaje copia = original.clonar();
+boolean mismaLista = original.getHabilidades() == copia.getHabilidades();
+System.out.println("¿Comparten la misma lista? " + mismaLista);
+### ESPERADO
+¿Comparten la misma lista? false
+### PRUEBA
+Personaje original = new Personaje("Guerrero", 10);
+original.agregarHabilidad("Ataque con espada");
+original.agregarHabilidad("Defensa con escudo");
+Personaje copia = original.clonar();
+System.out.println("Copia inicial: " + copia);
+### ESPERADO
+Copia inicial: Personaje [nombre=Guerrero, nivel=10, habilidades=[Ataque con espada, Defensa con escudo]]
+### PRUEBA
+Personaje original = new Personaje("Guerrero", 10);
+Personaje copia = original.clonar();
+System.out.println("¿Son el mismo objeto?: " + (original == copia));
+### ESPERADO
+¿Son el mismo objeto?: false
+### PRUEBA
+Personaje original = new Personaje("Mago", 7);
+original.agregarHabilidad("Bola de fuego");
+Personaje copia = original.clonar();
+copia.agregarHabilidad("Teletransporte");
+System.out.println("Original: " + original);
+System.out.println("Copia: " + copia);
+### ESPERADO
+Original: Personaje [nombre=Mago, nivel=7, habilidades=[Bola de fuego]]
+Copia: Personaje [nombre=Mago, nivel=7, habilidades=[Bola de fuego, Teletransporte]]

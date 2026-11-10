@@ -1,0 +1,8 @@
+proyecto/ (1250 KB)
+  README.md (5 KB)
+  src/ (1200 KB)
+    Main.java (200 KB)
+    utils/ (1000 KB)
+      Lib.java (1000 KB)
+  logo.png (45 KB)
+Total: 1250 KB

@@ -1,0 +1,4 @@
+[Moderno] Cobro de 49.99 EUR a Ana
+Resultado: true
+[Antigua] Procesando XML: <pago cliente="Ana" centimos="4999"/>
+Resultado: true

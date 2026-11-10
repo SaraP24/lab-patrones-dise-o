@@ -1,0 +1,6 @@
+[Tema claro]
+Botón blanco con texto negro
+Checkbox con borde gris
+[Tema oscuro]
+Botón negro con texto blanco
+Checkbox con borde azul

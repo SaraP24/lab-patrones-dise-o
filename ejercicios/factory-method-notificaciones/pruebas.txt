@@ -1,0 +1,20 @@
+### PRUEBA
+FabricaNotificacion fabricaCorreo = new FabricaCorreo();
+fabricaCorreo.enviarNotificacion("estudiante@correo.com", "La actividad fue publicada");
+### ESPERADO
+Correo enviado a estudiante@correo.com: La actividad fue publicada
+### PRUEBA
+FabricaNotificacion fabricaSMS = new FabricaSMS();
+fabricaSMS.enviarNotificacion("099123456", "Tu código de acceso es 4582");
+### ESPERADO
+SMS enviado a 099123456: Tu código de acceso es 4582
+### PRUEBA
+FabricaNotificacion fabricaCorreo = new FabricaCorreo();
+FabricaNotificacion fabricaSMS = new FabricaSMS();
+Notificacion correo = fabricaCorreo.crearNotificacion();
+Notificacion sms = fabricaSMS.crearNotificacion();
+System.out.println("Producto de FabricaCorreo: " + correo.getClass().getSimpleName());
+System.out.println("Producto de FabricaSMS: " + sms.getClass().getSimpleName());
+### ESPERADO
+Producto de FabricaCorreo: NotificacionCorreo
+Producto de FabricaSMS: NotificacionSMS

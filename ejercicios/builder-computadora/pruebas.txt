@@ -1,0 +1,30 @@
+### PRUEBA
+Computadora gamer = new Computadora.Builder("Intel i7")
+        .memoriaRam(32)
+        .almacenamiento("1TB SSD")
+        .tarjetaGrafica("RTX 4060")
+        .build();
+System.out.println(gamer);
+### ESPERADO
+Computadora [procesador=Intel i7, memoriaRam=32GB, almacenamiento=1TB SSD, tarjetaGrafica=RTX 4060]
+### PRUEBA
+Computadora basica = new Computadora.Builder("AMD Ryzen 3").build();
+System.out.println(basica);
+### ESPERADO
+Computadora [procesador=AMD Ryzen 3, memoriaRam=8GB, almacenamiento=256GB SSD, tarjetaGrafica=Integrada]
+### PRUEBA
+Computadora.Builder builder = new Computadora.Builder("Intel i5");
+System.out.println("¿Devuelve el mismo builder? " + (builder.memoriaRam(16) == builder));
+System.out.println(builder.almacenamiento("512GB SSD").build());
+### ESPERADO
+¿Devuelve el mismo builder? true
+Computadora [procesador=Intel i5, memoriaRam=16GB, almacenamiento=512GB SSD, tarjetaGrafica=Integrada]
+### PRUEBA
+try {
+    new Computadora.Builder("Intel i3").memoriaRam(0).build();
+    System.out.println("Se creó la computadora");
+} catch (IllegalArgumentException e) {
+    System.out.println("Error: " + e.getMessage());
+}
+### ESPERADO
+Error: La memoria RAM debe ser mayor que 0

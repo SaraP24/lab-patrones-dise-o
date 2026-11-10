@@ -1,0 +1,25 @@
+### PRUEBA
+Texto t = new Negrita(new TextoSimple("Hola"));
+System.out.println(t.mostrar());
+### ESPERADO
+<b>Hola</b>
+### PRUEBA
+Texto t = new Cursiva(new Negrita(new TextoSimple("Hola")));
+System.out.println(t.mostrar());
+### ESPERADO
+<i><b>Hola</b></i>
+### PRUEBA
+Texto a = new Negrita(new Mayusculas(new TextoSimple("hola")));
+Texto b = new Mayusculas(new Negrita(new TextoSimple("hola")));
+System.out.println(a.mostrar());
+System.out.println(b.mostrar());
+### ESPERADO
+<b>HOLA</b>
+<B>HOLA</B>
+### PRUEBA
+Texto t = new Negrita(new Negrita(new TextoSimple("Doble")));
+System.out.println(t.mostrar());
+System.out.println("¿Sigue siendo un Texto? " + (t instanceof Texto));
+### ESPERADO
+<b><b>Doble</b></b>
+¿Sigue siendo un Texto? true

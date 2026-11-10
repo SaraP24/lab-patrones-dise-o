@@ -1,0 +1,40 @@
+### PRUEBA
+Departamento ventas = new Departamento("Ventas");
+ventas.agregar(new Empleado("Ana", 50000));
+ventas.agregar(new Empleado("Luis", 45000));
+System.out.println("Total: " + ventas.getSalario());
+### ESPERADO
+Total: 95000
+### PRUEBA
+Departamento ventas = new Departamento("Ventas");
+ventas.agregar(new Empleado("Ana", 50000));
+Departamento it = new Departamento("IT");
+it.agregar(new Empleado("Sofía", 70000));
+it.agregar(new Empleado("Mateo", 65000));
+Departamento empresa = new Departamento("Empresa");
+empresa.agregar(new Empleado("Directora", 120000));
+empresa.agregar(ventas);
+empresa.agregar(it);
+empresa.mostrar("");
+### ESPERADO
+Departamento Empresa (total $305000)
+  Directora ($120000)
+  Departamento Ventas (total $50000)
+    Ana ($50000)
+  Departamento IT (total $135000)
+    Sofía ($70000)
+    Mateo ($65000)
+### PRUEBA
+Departamento nuevo = new Departamento("Innovación");
+nuevo.mostrar("");
+System.out.println("Total: " + nuevo.getSalario());
+### ESPERADO
+Departamento Innovación (total $0)
+Total: 0
+### PRUEBA
+ComponenteEmpresa solo = new Empleado("Carla", 30000);
+solo.mostrar("> ");
+System.out.println("Total: " + solo.getSalario());
+### ESPERADO
+> Carla ($30000)
+Total: 30000

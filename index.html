@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Laboratorio de Patrones</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: índice fijo a la izquierda · teoría arriba · selector de ejercicios · editor y consola lado a lado */
+:root {
+  --bg: #f5f6f8; --panel: #ffffff; --ink: #1b1f27; --muted: #5d6575; --line: #dde1e8;
+  --accent: #2f5bd3; --accent-ink: #ffffff;
+  --crea: #0f8a6a; --comp: #b4610b; --estr: #7445c9; --algo: #b23a6b;
+  --ok: #17803d; --bad: #c0362c; --warn: #a96a00;
+  --code-bg: #fbfbfd; --code-ink: #24292f; --gutter: #9aa1ad;
+  --k: #a626a4; --s: #2a7d2a; --c: #8a919d; --n: #b35c00; --t: #1f63c7; --todo: #c0362c;
+  --con-bg: #12151b; --con-ink: #d9dee7;
+  --f-ui: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-code: "JetBrains Mono", Consolas, "Cascadia Mono", monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #111318; --panel: #181b22; --ink: #e5e8ee; --muted: #9aa3b2; --line: #2a2f3a;
+    --accent: #7c9cff; --accent-ink: #0d1020;
+    --crea: #3fc79c; --comp: #f0a24a; --estr: #ad8cff; --algo: #f07aa8;
+    --ok: #4fc779; --bad: #ff7468; --warn: #f0b44a;
+    --code-bg: #14171d; --code-ink: #d6dbe4; --gutter: #5b6372;
+    --k: #d38cf0; --s: #8fd18b; --c: #6e7685; --n: #f2a65a; --t: #7fb0ff; --todo: #ff8a7a;
+    --con-bg: #0b0d11; --con-ink: #d9dee7;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body { background: var(--bg); color: var(--ink); font: 15px/1.55 var(--f-ui); }
+button { font: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { display: grid; grid-template-columns: 250px minmax(0, 1fr); min-height: 100vh; }
+nav { background: var(--panel); border-right: 1px solid var(--line); padding: 20px 14px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+nav h1 { font-size: 17px; margin: 0 0 2px; letter-spacing: -.01em; }
+nav .sub { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+.progreso { height: 6px; background: var(--line); border-radius: 3px; overflow: hidden; margin-bottom: 4px; }
+.progreso i { display: block; height: 100%; background: var(--ok); width: 0; transition: width .3s; }
+.progreso-txt { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.grupo { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 600; margin: 16px 6px 6px; }
+.grupo.crea { color: var(--crea); } .grupo.comp { color: var(--comp); } .grupo.estr { color: var(--estr); } .grupo.algo { color: var(--algo); } .grupo.extra { color: var(--muted); }
+nav button.item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; border: 0; background: none; color: var(--ink); padding: 6px 8px; border-radius: 6px; font-size: 14px; }
+nav button.item:hover { background: color-mix(in srgb, var(--accent) 9%, transparent); }
+nav button.item[aria-current="true"] { background: color-mix(in srgb, var(--accent) 16%, transparent); font-weight: 600; }
+nav .check { width: 16px; height: 16px; border-radius: 50%; border: 1.5px solid var(--line); flex: none; display: grid; place-items: center; font-size: 10px; color: transparent; }
+nav .hecho .check { background: var(--ok); border-color: var(--ok); color: #fff; }
+nav .parcial .check { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 25%, transparent); }
+nav .cuenta { margin-left: auto; font-size: 11.5px; color: var(--muted); font-variant-numeric: tabular-nums; font-weight: 400; }
+
+main { padding: 24px max(16px, 2.5vw) 40px; min-width: 0; }
+.cabecera { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px 14px; margin-bottom: 4px; }
+.cabecera h2 { margin: 0; font-size: 28px; letter-spacing: -.02em; }
+.chip { font-size: 12px; font-weight: 600; padding: 2px 9px; border-radius: 99px; border: 1px solid currentColor; }
+.chip.crea { color: var(--crea); } .chip.comp { color: var(--comp); } .chip.estr { color: var(--estr); } .chip.algo { color: var(--algo); }
+.intencion { font-size: 17px; max-width: 75ch; margin: 6px 0 16px; }
+
+.teoria { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; margin-bottom: 22px; }
+.tarjeta { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0; }
+.tarjeta h3 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+.tarjeta p, .tarjeta ul { margin: 0; }
+.tarjeta ul { padding-left: 18px; }
+.tarjeta li + li { margin-top: 3px; }
+.tarjeta pre { margin: 0; font: 12.5px/1.45 var(--f-code); overflow-x: auto; color: var(--code-ink); }
+code { font-family: var(--f-code); font-size: .9em; background: color-mix(in srgb, var(--accent) 8%, transparent); padding: 1px 4px; border-radius: 4px; }
+
+.sel-ej { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; align-items: center; }
+.sel-ej .rotulo { font-size: 12px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; margin-right: 4px; }
+.sel-ej button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 8px; padding: 6px 12px; font-size: 14px; }
+.sel-ej button[aria-pressed="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--panel)); font-weight: 600; }
+.sel-ej .ok-mini { color: var(--ok); font-weight: 700; }
+.origen { font-size: 11px; font-weight: 600; letter-spacing: .04em; padding: 1px 6px; border-radius: 4px; background: color-mix(in srgb, var(--algo) 14%, transparent); color: var(--algo); }
+
+.ejercicio { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 14px; }
+.ejercicio h3 { margin: 0 0 6px; font-size: 16px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.ejercicio ol { margin: 8px 0 0; padding-left: 20px; max-width: 95ch; }
+.ejercicio ol li + li { margin-top: 3px; }
+.ejercicio .modo { font-size: 13px; color: var(--muted); margin-top: 8px; }
+.pistas { margin-top: 10px; }
+.pistas button { border: 1px dashed var(--line); background: none; color: var(--accent); border-radius: 6px; padding: 3px 10px; font-size: 13px; }
+.pistas p { margin: 8px 0 0; padding: 8px 12px; border-left: 3px solid var(--warn); background: color-mix(in srgb, var(--warn) 8%, transparent); border-radius: 0 6px 6px 0; font-size: 14px; }
+
+.barra { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--ink); border-radius: 7px; padding: 7px 14px; font-size: 14px; }
+.btn:hover { border-color: var(--accent); }
+.btn.primario { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); font-weight: 600; }
+.btn:disabled { opacity: .55; cursor: wait; }
+.atajo { color: var(--muted); font-size: 12px; margin-left: auto; }
+
+.lab { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 14px; align-items: stretch; }
+.editor { position: relative; height: 560px; border: 1px solid var(--line); border-radius: 10px; background: var(--code-bg); overflow: hidden; display: grid; grid-template-columns: 46px minmax(0, 1fr); }
+.gutter { font: 13px/20px var(--f-code); color: var(--gutter); text-align: right; padding: 12px 8px 80px 0; overflow: hidden; white-space: pre; user-select: none; border-right: 1px solid var(--line); }
+.zona { position: relative; min-width: 0; }
+.zona pre, .zona textarea { position: absolute; inset: 0; margin: 0; padding: 12px 14px; font: 13px/20px var(--f-code); font-variant-ligatures: none; font-kerning: none; letter-spacing: 0; tab-size: 4; white-space: pre; overflow-wrap: normal; word-break: normal; overflow: auto; border: 0; }
+/* La capa coloreada no tiene barras de scroll: le damos margen extra abajo y a la derecha
+   para que siempre pueda desplazarse tanto como el textarea (que sí las tiene) y no se desalinee */
+.zona pre { color: var(--code-ink); pointer-events: none; overflow: hidden; padding-bottom: 80px; padding-right: 80px; }
+.zona textarea { background: transparent; color: transparent; caret-color: var(--ink); resize: none; outline: none; }
+.zona textarea::selection { background: color-mix(in srgb, var(--accent) 30%, transparent); color: transparent; }
+.tk-k { color: var(--k); font-weight: 600; } .tk-s { color: var(--s); } .tk-c { color: var(--c); font-style: italic; }
+.tk-n { color: var(--n); } .tk-t { color: var(--t); } .tk-a { color: var(--n); } .tk-todo { color: var(--todo); font-weight: 600; font-style: normal; }
+
+.consola { display: flex; flex-direction: column; height: 560px; border-radius: 10px; overflow: hidden; background: var(--con-bg); color: var(--con-ink); border: 1px solid var(--line); min-width: 0; }
+.con-cab { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-bottom: 1px solid #262b35; font-size: 13px; }
+.con-cab b { font-weight: 600; }
+.estado { margin-left: auto; font-size: 12px; padding: 2px 9px; border-radius: 99px; background: #262b35; color: #b9c0cc; }
+.estado.ok { background: #143d24; color: #7ee2a0; } .estado.bad { background: #47201c; color: #ff9d92; } .estado.warn { background: #46340f; color: #ffd27a; }
+.con-tabs { display: flex; gap: 2px; padding: 0 8px; border-bottom: 1px solid #262b35; }
+.con-tabs button { background: none; border: 0; color: #8f98a8; padding: 7px 10px; font-size: 13px; border-bottom: 2px solid transparent; }
+.con-tabs button[aria-selected="true"] { color: #fff; border-bottom-color: #7c9cff; }
+.con-cuerpo { flex: 1; overflow: auto; padding: 10px 14px; font: 13px/1.55 var(--f-code); white-space: pre; }
+.con-cuerpo .err { color: #ff9d92; } .con-cuerpo .dim { color: #7d8697; } .con-cuerpo .okl { color: #7ee2a0; }
+.diff-l { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 6px; }
+.diff-l.mal { background: rgba(255, 100, 90, .12); }
+.veredicto { padding: 10px 14px; border-top: 1px solid #262b35; font-size: 14px; }
+.veredicto.ok { background: #143d24; color: #9ff0b9; } .veredicto.bad { background: #3a1c19; color: #ffb3aa; }
+
+/* Pruebas tipo CodeRunner dentro de la consola */
+.prueba { border: 1px solid #2a303b; border-radius: 8px; margin-bottom: 10px; white-space: normal; font-family: var(--f-ui); }
+.prueba > summary { list-style: none; cursor: pointer; padding: 7px 10px; display: flex; gap: 8px; align-items: center; font-size: 13px; }
+.prueba > summary::-webkit-details-marker { display: none; }
+.prueba.ok > summary .marca { color: #7ee2a0; } .prueba.mal > summary .marca { color: #ff9d92; } .prueba.pend > summary .marca { color: #7d8697; }
+.prueba.mal { border-color: #5a2a26; background: rgba(255, 100, 90, .06); }
+.prueba .ms { margin-left: auto; color: #7d8697; font-size: 12px; font-variant-numeric: tabular-nums; }
+.prueba .bloques { display: grid; gap: 8px; padding: 0 10px 10px; }
+.prueba .bloque b { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .07em; color: #8f98a8; margin-bottom: 2px; font-weight: 600; }
+.prueba pre { margin: 0; font: 12.5px/1.5 var(--f-code); white-space: pre; overflow-x: auto; background: #181c24; padding: 6px 8px; border-radius: 6px; color: #d9dee7; }
+.prueba pre.esp { color: #9ff0b9; } .prueba pre.obt-mal { color: #ffb3aa; }
+
+.aviso { background: color-mix(in srgb, var(--warn) 12%, var(--panel)); border: 1px solid color-mix(in srgb, var(--warn) 50%, var(--line)); padding: 10px 14px; border-radius: 8px; margin-bottom: 14px; }
+.aviso code { background: transparent; font-weight: 600; }
+
+table.comp { border-collapse: collapse; width: 100%; font-size: 14px; background: var(--panel); }
+table.comp th, table.comp td { text-align: left; border: 1px solid var(--line); padding: 8px 10px; vertical-align: top; }
+table.comp th { background: color-mix(in srgb, var(--accent) 7%, var(--panel)); }
+.scroll-x { overflow-x: auto; margin-bottom: 20px; }
+
+/* Test teórico */
+.quiz-cab { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 0 0 16px; }
+.marcador { font-size: 15px; font-variant-numeric: tabular-nums; }
+.marcador b { font-size: 20px; }
+.pregunta { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; max-width: 900px; }
+.pregunta h3 { margin: 0 0 10px; font-size: 15.5px; font-weight: 600; display: flex; gap: 10px; }
+.pregunta h3 .num { color: var(--muted); font-variant-numeric: tabular-nums; flex: none; }
+.pregunta .tema { font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+.opciones { display: grid; gap: 6px; }
+.opciones button { text-align: left; border: 1px solid var(--line); background: var(--bg); color: var(--ink); border-radius: 8px; padding: 8px 12px; font-size: 14.5px; display: flex; gap: 10px; }
+.opciones button:hover:not(:disabled) { border-color: var(--accent); }
+.opciones button:disabled { cursor: default; }
+.opciones .letra { font-weight: 600; color: var(--muted); }
+.opciones button.correcta { border-color: var(--ok); background: color-mix(in srgb, var(--ok) 12%, var(--panel)); }
+.opciones button.incorrecta { border-color: var(--bad); background: color-mix(in srgb, var(--bad) 10%, var(--panel)); }
+.explicacion { margin-top: 10px; font-size: 14px; padding: 8px 12px; border-radius: 6px; background: color-mix(in srgb, var(--accent) 7%, transparent); }
+
+@media (max-width: 1000px) {
+  .lab { grid-template-columns: minmax(0, 1fr); }
+  .editor { height: 460px; } .consola { height: 420px; }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  nav { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); }
+  nav .lista { display: flex; flex-wrap: wrap; gap: 4px; }
+  nav .grupo { width: 100%; margin: 8px 4px 2px; }
+  nav button.item { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <nav aria-label="Patrones">
+    <h1>Laboratorio de Patrones</h1>
+    <p class="sub">Patrones y estructuras · Java 21 real</p>
+    <div class="progreso"><i id="barra-progreso"></i></div>
+    <div class="progreso-txt" id="txt-progreso"></div>
+    <div class="lista" id="lista"></div>
+  </nav>
+  <main id="main"></main>
+</div>
+
+<script>
+/* tipo "programa": el ejercicio tiene su propio main y se compara toda la salida (esperado.txt).
+   tipo "pruebas":  estilo CodeRunner; escribís solo las clases y cada prueba de pruebas.txt
+                    se ejecuta por separado en su propia JVM. */
+const PATRONES = [
+{ id: "builder", nombre: "Builder", cat: "crea",
+  intencion: "Construye un objeto complejo paso a paso, separando la construcción de la representación final.",
+  problema: "Un constructor con 8 parámetros, la mitad opcionales: new Pizza(\"grande\", null, true, false, null...). Es ilegible y fácil de equivocarse en el orden.",
+  analogia: "Pedir un bocadillo en una barra: eliges pan, luego relleno, luego salsas, y al final te lo entregan montado.",
+  cuando: ["Objetos con muchos parámetros opcionales", "Quieres objetos inmutables (campos final)", "Quieres validar todo antes de crear el objeto"],
+  estructura: "Pizza (producto inmutable)\n └─ Pizza.Builder\n      masa(..)        → return this\n      ingrediente(..) → return this\n      build()         → valida y crea Pizza",
+  enJava: ["StringBuilder", "HttpClient.newBuilder()", "Stream.builder()", "Lombok @Builder"],
+  ojo: "Cada método del builder devuelve this para poder encadenar. El constructor del producto suele ser privado. Ventaja clave (pregunta de examen): separa el proceso de construcción de la representación del objeto.",
+  ejercicios: [
+    { id: "builder", titulo: "Pizzería", tipo: "programa",
+      tarea: "Completa el Builder de Pizza para que la construcción encadenada funcione y la validación rechace tamaños no válidos.",
+      pistas: ["En masa(): this.masa = masa; antes del return this.", "En ingrediente(): ingredientes.add(ingrediente);", "En build(): if (!List.of(\"pequeña\", \"mediana\", \"grande\").contains(tamano)) throw new IllegalArgumentException(...)"] },
+    { id: "builder-computadora", titulo: "Computadoras", tipo: "pruebas",
+      tarea: "Completa el Builder de Computadora: el procesador es obligatorio y el resto de componentes tiene valores por defecto.",
+      pasos: ["Constructor privado de Computadora: copia los cuatro valores desde el builder.", "memoriaRam(), almacenamiento() y tarjetaGrafica(): guarda el valor y devuelve this para poder encadenar.", "build(): si memoriaRam es menor o igual a 0, lanza IllegalArgumentException(\"La memoria RAM debe ser mayor que 0\").", "build(): devuelve new Computadora(this)."],
+      pistas: ["this.procesador = builder.procesador; (y lo mismo con los otros tres)", "public Builder memoriaRam(int memoriaRam) { this.memoriaRam = memoriaRam; return this; }", "if (memoriaRam <= 0) throw new IllegalArgumentException(\"La memoria RAM debe ser mayor que 0\"); return new Computadora(this);"] }
+  ] },
+
+{ id: "abstract-factory", nombre: "Abstract Factory", cat: "crea",
+  intencion: "Proporciona una interfaz para crear familias de objetos relacionados sin especificar sus clases concretas.",
+  problema: "Tu app tiene tema claro y oscuro. Si mezclas un botón claro con un checkbox oscuro, la interfaz queda rota. Necesitas garantizar que todos los componentes sean de la misma familia.",
+  analogia: "Una tienda de muebles por estilos: si eliges 'nórdico', la silla, la mesa y el sofá vienen todos del mismo catálogo.",
+  cuando: ["Hay varias familias de productos que deben usarse juntas", "Quieres cambiar de familia entera cambiando un solo objeto", "El cliente no debe depender de clases concretas"],
+  estructura: "FabricaUI (interfaz)\n ├─ crearBoton()   → Boton\n └─ crearCheckbox() → Checkbox\nFabricaClara  → BotonClaro,  CheckboxClaro\nFabricaOscura → BotonOscuro, CheckboxOscuro\nAplicacion usa solo FabricaUI",
+  enJava: ["DocumentBuilderFactory", "javax.xml.transform.TransformerFactory", "Drivers de WebDriver por navegador"],
+  ojo: "Añadir una familia nueva es fácil; añadir un producto nuevo (p. ej. crearSlider) obliga a tocar todas las fábricas. Factory Method crea UN producto; Abstract Factory crea FAMILIAS de productos relacionados.",
+  ejercicios: [
+    { id: "abstract-factory", titulo: "Temas claro y oscuro", tipo: "programa",
+      tarea: "Crea la familia oscura completa: BotonOscuro, CheckboxOscuro y haz que FabricaOscura los devuelva.",
+      pistas: ["class BotonOscuro implements Boton { public String pintar() { return \"Botón negro con texto blanco\"; } }", "Igual para CheckboxOscuro con \"Checkbox con borde azul\".", "En FabricaOscura sustituye el throw por return new BotonOscuro(); y return new CheckboxOscuro();"] },
+    { id: "abstract-factory-muebles", titulo: "Muebles", tipo: "pruebas",
+      tarea: "Completa las fábricas de muebles moderno y victoriano y el Comedor, que amuebla usando solo la fábrica que recibe.",
+      pasos: ["FabricaModerna devuelve SillaModerna y MesaModerna; FabricaVictoriana, SillaVictoriana y MesaVictoriana.", "Cada llamada a crearX() devuelve un objeto nuevo.", "Comedor guarda la fábrica recibida en su constructor.", "amueblar(): pide una mesa y una silla a la fábrica y muestra Mesa: ... y luego Silla: ...", "Comedor no debe hacer new de ningún mueble concreto."],
+      pistas: ["public Silla crearSilla() { return new SillaModerna(); }", "this.fabrica = fabrica;", "Mesa mesa = fabrica.crearMesa(); Silla silla = fabrica.crearSilla(); System.out.println(\"Mesa: \" + mesa.describir());"] }
+  ] },
+
+{ id: "factory-method", nombre: "Factory Method", cat: "crea",
+  intencion: "Define un método para crear un objeto, pero deja que las subclases decidan qué clase concreta instanciar.",
+  problema: "La lógica de 'planificar entrega' es la misma para todas las empresas, pero cada una usa un transporte distinto. No quieres un switch gigante con new Camion(), new Barco()...",
+  analogia: "Una franquicia: el manual de cómo atender al cliente es el mismo, pero cada local decide qué producto local fabrica.",
+  cuando: ["Una clase no sabe de antemano qué objetos debe crear", "Quieres que las subclases elijan el tipo concreto", "Quieres extender sin modificar el código existente (Open/Closed)"],
+  estructura: "Logistica (abstracta)\n ├─ crearTransporte()  ← factory method (abstracto)\n └─ planificarEntrega() usa crearTransporte()\nLogisticaTerrestre → new Camion()\nLogisticaMaritima  → new Barco()",
+  enJava: ["Collection.iterator()", "Calendar.getInstance()", "NumberFormat.getInstance()"],
+  ojo: "Propósito (pregunta de examen): crear objetos sin especificar la clase exacta que se creará. Diferencia con Abstract Factory: Factory Method crea un único producto; Abstract Factory, familias.",
+  ejercicios: [
+    { id: "factory-method", titulo: "Logística", tipo: "programa",
+      tarea: "Implementa Barco, Avion, LogisticaMaritima y LogisticaAerea, y añade la logística aérea a la lista de main.",
+      pistas: ["class Barco implements Transporte { public String entregar() { return \"Barco entrega por mar en contenedor\"; } }", "class LogisticaAerea extends Logistica { protected Transporte crearTransporte() { return new Avion(); } }", "No olvides añadir la coma en List.of(..., new LogisticaAerea())."] },
+    { id: "factory-method-notificaciones", titulo: "Notificaciones", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa la creación y el envío para que cada fábrica decida qué tipo de notificación crear.",
+      pasos: ["NotificacionCorreo.enviar(): muestra Correo enviado a [destinatario]: [mensaje] (sin corchetes).", "NotificacionSMS.enviar(): muestra SMS enviado a [destinatario]: [mensaje].", "enviarNotificacion(): llama a crearNotificacion(), guarda el resultado en una variable Notificacion e invoca enviar(destinatario, mensaje).", "FabricaCorreo y FabricaSMS: reemplaza return null; por el objeto nuevo que corresponde.", "No cambies las firmas ni uses if para elegir el canal: esa decisión es de cada fábrica."],
+      pistas: ["System.out.println(\"Correo enviado a \" + destinatario + \": \" + mensaje);", "Notificacion notificacion = crearNotificacion(); notificacion.enviar(destinatario, mensaje);", "return new NotificacionCorreo();  /  return new NotificacionSMS();"] }
+  ] },
+
+{ id: "prototype", nombre: "Prototype", cat: "crea",
+  intencion: "Crea objetos nuevos copiando (clonando) un objeto existente que actúa como prototipo.",
+  problema: "Crear un objeto desde cero es caro o tienes uno ya configurado y quieres variantes. Copiar campo a campo desde fuera rompe la encapsulación.",
+  analogia: "La división celular: la célula se copia a sí misma; nadie desde fuera necesita saber cómo está hecha.",
+  cuando: ["Crear el objeto es costoso (consultas, cálculos)", "Necesitas muchas variantes de una configuración base", "Quieres un catálogo de plantillas listas para clonar"],
+  estructura: "Forma (abstracta)\n └─ clonar() → Forma\nCirculo(Circulo otro)       ← constructor de copia\nRectangulo(Rectangulo otro)\nRegistroFormas: clave → prototipo.clonar()",
+  enJava: ["Object.clone() + Cloneable", "Constructores de copia: new ArrayList<>(otra)", "Spring scope=\"prototype\""],
+  ojo: "Copia superficial vs profunda: si copias la referencia a una lista, original y copia comparten la MISMA lista. En Java se prefiere el constructor de copia frente a clone().",
+  ejercicios: [
+    { id: "prototype", titulo: "Formas", tipo: "programa",
+      tarea: "Arregla los clones: deben ser objetos distintos, con su propia lista de etiquetas, y el registro debe devolver copias.",
+      pistas: ["En Forma(Forma otra): this.etiquetas = new ArrayList<>(otra.etiquetas);", "Circulo.clonar(): return new Circulo(this);", "Crea Rectangulo(Rectangulo otro) { super(otro); this.ancho = otro.ancho; this.alto = otro.alto; } y en RegistroFormas.crear usa .clonar()."] },
+    { id: "prototype-personaje", titulo: "Personajes", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa la clonación para obtener un personaje nuevo con los mismos datos iniciales, pero con su propia lista de habilidades.",
+      pasos: ["En el constructor de copia Personaje(Personaje original), original es el que copias y this es el nuevo.", "Copia nombre y nivel desde original.", "Habilidades: crea un nuevo ArrayList con los elementos de la lista original (no asignes la misma lista).", "clonar(): reemplaza return null; por new Personaje(this)."],
+      pistas: ["this.nombre = original.nombre; this.nivel = original.nivel;", "this.habilidades = new ArrayList<>(original.habilidades);", "return new Personaje(this);"] }
+  ] },
+
+{ id: "singleton", nombre: "Singleton", cat: "crea",
+  intencion: "Garantiza que una clase tenga una única instancia y ofrece un punto de acceso global a ella.",
+  problema: "La configuración se lee una sola vez y todo el programa debe ver los mismos valores. Si cada clase hace new Configuracion(), cada una tiene su copia distinta.",
+  analogia: "El gobierno de un país: puede haber muchos ministerios, pero hay un único gobierno oficial al que todos se refieren.",
+  cuando: ["Debe existir exactamente un objeto (configuración, pool, registro)", "Necesitas acceso global controlado", "La creación debe ser perezosa y segura entre hilos"],
+  estructura: "Configuracion\n ├─ private static Configuracion instancia\n ├─ private Configuracion()\n └─ public static getInstancia()\n      if (instancia == null) instancia = new ...\n      return instancia",
+  enJava: ["Runtime.getRuntime()", "Desktop.getDesktop()", "enum Singleton { INSTANCIA } (forma más robusta)", "Beans de Spring (scope singleton por defecto)"],
+  ojo: "Es estado global: dificulta los tests y oculta dependencias. Con hilos, la versión 'if (instancia == null) instancia = new...' sin sincronizar puede crear varias instancias.",
+  ejercicios: [
+    { id: "singleton", titulo: "Configuración con hilos", tipo: "programa",
+      tarea: "Convierte Configuracion en un Singleton real y seguro entre hilos: una sola construcción, vista por los 10 hilos.",
+      pistas: ["Cambia public Configuracion() por private Configuracion().", "Añade: private static class Holder { static final Configuracion INSTANCIA = new Configuracion(); }", "getInstancia() devuelve Holder.INSTANCIA."] },
+    { id: "singleton-configuracion", titulo: "Configuración del sistema", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa ConfiguracionSistema para que todas las partes de la aplicación usen el mismo objeto de configuración.",
+      pasos: ["Constructor privado: asigna \"Español\" al atributo idioma.", "getInstancia(): si instancia es null, crea un ConfiguracionSistema y guárdalo en instancia.", "Después de la comprobación, devuelve instancia (tanto si se acaba de crear como si ya existía).", "getIdioma(): devuelve idioma. setIdioma(): guarda el valor usando this.", "No cambies la visibilidad del constructor ni crees un objeto nuevo en cada llamada."],
+      pistas: ["this.idioma = \"Español\";", "if (instancia == null) { instancia = new ConfiguracionSistema(); } return instancia;", "public void setIdioma(String idioma) { this.idioma = idioma; }"] }
+  ] },
+
+{ id: "observer", nombre: "Observer", cat: "comp",
+  intencion: "Define una dependencia uno-a-muchos: cuando un objeto cambia de estado, notifica automáticamente a todos sus suscriptores.",
+  problema: "Varias pantallas deben actualizarse cuando cambia la temperatura. Si la estación conoce cada pantalla concreta, añadir una nueva obliga a modificar la estación.",
+  analogia: "Suscribirte a un canal: no preguntas cada hora si hay vídeo nuevo; el canal te avisa. Y puedes darte de baja.",
+  cuando: ["Un cambio en un objeto afecta a otros, y no sabes cuántos", "Quieres desacoplar al emisor de los receptores", "Sistemas de eventos, UI, mensajería"],
+  estructura: "EstacionMeteorologica (sujeto)\n ├─ List<Observador>\n ├─ suscribir / desuscribir\n └─ notificar() → o.actualizar(t)\nObservador ← Pantalla, AlertaCalor",
+  enJava: ["PropertyChangeListener", "java.util.concurrent.Flow (reactivo)", "Listeners de Swing/JavaFX", "Eventos de Spring (@EventListener)"],
+  ojo: "Olvidar desuscribirse provoca fugas de memoria. El orden de notificación no debería ser algo de lo que dependa tu lógica.",
+  ejercicios: [
+    { id: "observer", titulo: "Estación meteorológica", tipo: "programa",
+      tarea: "Implementa la suscripción, la baja y la notificación, y crea el observador AlertaCalor que avisa por encima del umbral.",
+      pistas: ["suscribir: observadores.add(o); desuscribir: observadores.remove(o);", "notificar: for (Observador o : observadores) o.actualizar(temperatura);", "AlertaCalor necesita un campo private final double umbral; y comprobar if (t > umbral)."] },
+    { id: "observer-canal", titulo: "Canal de videos", tipo: "pruebas",
+      tarea: "Completa el Canal (sujeto) y el Usuario (observador) para que cada video nuevo avise a todos los suscriptores.",
+      pasos: ["Usuario.notificar(): muestra [nombre] recibió aviso de [canal]: [video].", "suscribir() y desuscribir(): agregan y quitan de la lista.", "cantidadSuscriptores(): devuelve el tamaño de la lista.", "subirVideo(): muestra [canal] publicó: [titulo] y llama a notificar() en cada suscriptor, en orden de suscripción.", "Una lambda también puede ser suscriptora: Suscriptor tiene un solo método."],
+      pistas: ["System.out.println(nombre + \" recibió aviso de \" + canal + \": \" + video);", "suscriptores.add(s);  /  suscriptores.remove(s);  /  return suscriptores.size();", "System.out.println(nombre + \" publicó: \" + titulo); for (Suscriptor s : suscriptores) s.notificar(nombre, titulo);"] }
+  ] },
+
+{ id: "strategy", nombre: "Strategy", cat: "comp",
+  intencion: "Define una familia de algoritmos intercambiables, encapsula cada uno y permite cambiarlos en tiempo de ejecución.",
+  problema: "El cálculo del total tiene if (tipo == \"porcentaje\") ... else if (tipo == \"fijo\") ... y cada promoción nueva obliga a tocar el carrito.",
+  analogia: "Ir al aeropuerto: en coche, en tren o en taxi. El destino es el mismo; eliges la estrategia según tiempo y dinero.",
+  cuando: ["Tienes varias formas de hacer lo mismo", "Quieres eliminar condicionales grandes por tipo", "El algoritmo debe poder cambiar en ejecución"],
+  estructura: "Carrito (contexto)\n └─ EstrategiaDescuento estrategia\n      aplicar(subtotal)\nSinDescuento · DescuentoPorcentaje · DescuentoFijo · lambda",
+  enJava: ["Comparator en Collections.sort / List.sort", "Interfaces funcionales + lambdas", "javax.servlet.Filter (similar)"],
+  ojo: "Con interfaces funcionales, muchas estrategias se resuelven con una lambda sin crear clases. Diferencia con State: en Strategy el cliente elige el algoritmo; en State el objeto cambia solo.",
+  ejercicios: [
+    { id: "strategy", titulo: "Descuentos", tipo: "programa",
+      tarea: "Implementa los descuentos, haz que el carrito delegue en la estrategia y añade una estrategia Black Friday con lambda.",
+      pistas: ["Porcentaje: return subtotal * (1 - porcentaje / 100);", "Fijo: return Math.max(0, subtotal - cantidad);", "total(): return estrategia.aplicar(subtotal);  Lambda: carrito.setEstrategia(s -> s * 0.5);"] },
+    { id: "strategy-envios", titulo: "Costos de envío", tipo: "pruebas",
+      tarea: "Implementa tres estrategias de envío y haz que el Pedido delegue el cálculo en la estrategia actual.",
+      pasos: ["EnvioEstandar: 100 + 20 por kg.", "EnvioExpress: 250 + 35 por kg.", "RetiroEnLocal: 0.", "setEstrategia(): permite cambiar la estrategia en tiempo de ejecución.", "costoEnvio(): devuelve estrategia.calcularCosto(pesoKg), sin if ni instanceof."],
+      pistas: ["return 100 + 20 * pesoKg;", "this.estrategia = estrategia;", "return estrategia.calcularCosto(pesoKg);"] }
+  ] },
+
+{ id: "adapter", nombre: "Adapter", cat: "estr",
+  intencion: "Convierte la interfaz de una clase en otra que el cliente espera, para que clases incompatibles trabajen juntas.",
+  problema: "Tu sistema trabaja con ProcesadorPago.pagar(cliente, euros), pero tienes que integrar una pasarela antigua que solo acepta XML con céntimos y que no puedes modificar.",
+  analogia: "El adaptador de enchufe de viaje: el cargador no cambia, la pared no cambia; el adaptador traduce entre ambos.",
+  cuando: ["Integrar librerías externas o código heredado", "No puedes (o no quieres) cambiar la clase existente", "Quieres aislar tu código de una API ajena"],
+  estructura: "ProcesadorPago (target)\n ├─ PagoModerno\n └─ AdaptadorPasarelaAntigua\n      tiene PasarelaAntigua (adaptee)\n      pagar() → traduce → enviarXml()",
+  enJava: ["Arrays.asList()", "InputStreamReader (bytes → caracteres)", "Collections.enumeration()"],
+  ojo: "El adapter cambia la interfaz pero no añade funcionalidad. En tu curso: respeta el principio abierto/cerrado (integras sin modificar la clase existente).",
+  ejercicios: [
+    { id: "adapter", titulo: "Pasarela de pago", tipo: "programa",
+      tarea: "Implementa pagar() del adaptador traduciendo euros a céntimos y la llamada a XML.",
+      pistas: ["long centimos = Math.round(euros * 100);", "String xml = \"<pago cliente=\\\"\" + cliente + \"\\\" centimos=\\\"\" + centimos + \"\\\"/>\";", "return pasarela.enviarXml(xml).startsWith(\"OK\");"] },
+    { id: "adapter-enchufes", titulo: "Enchufes", tipo: "pruebas", origen: "UTEC",
+      tarea: "Adapta un EnchufeAmericano a la interfaz EnchufeEuropeo sin modificar la forma de usar EnchufeAmericano.",
+      pasos: ["EnchufeAmericano.conectarEnchufeAmericano(): muestra Enchufe americano conectado.", "El Adaptador implementa EnchufeEuropeo y recibe un EnchufeAmericano en su constructor.", "conectarEnchufeEuropeo(): usa internamente conectarEnchufeAmericano() y luego muestra Usando un adaptador europeo.", "La interfaz EnchufeEuropeo no lleva public."],
+      pistas: ["this.enchufeAmericano = enchufeAmericano;", "enchufeAmericano.conectarEnchufeAmericano();", "System.out.println(\"Usando un adaptador europeo.\");"] }
+  ] },
+
+{ id: "decorator", nombre: "Decorator", cat: "estr",
+  intencion: "Añade responsabilidades a un objeto dinámicamente, envolviéndolo en otros objetos con la misma interfaz.",
+  problema: "Café con leche, con caramelo, con leche y nata... Con herencia necesitarías una clase por combinación: CafeConLecheYNata, CafeConCarameloYLeche...",
+  analogia: "Ponerte ropa: camiseta, jersey, abrigo. Cada capa envuelve a la anterior y añade algo, y sigues siendo tú.",
+  cuando: ["Quieres combinar comportamientos opcionales sin explosión de subclases", "Añadir o quitar funcionalidad en tiempo de ejecución", "No puedes heredar (clase final) o no conviene"],
+  estructura: "Cafe (componente)\n ├─ CafeSimple (componente concreto)\n └─ DecoradorCafe (decorador: ES y TIENE un Cafe)\n      ├─ ConLeche      (decorador concreto)\n      ├─ ConCaramelo   (decorador concreto)\n      └─ ConNata       (decorador concreto)",
+  enJava: ["new BufferedReader(new InputStreamReader(in))", "Collections.unmodifiableList()", "Collections.synchronizedMap()"],
+  ojo: "Pregunta de examen: quien implementa las operaciones decoradas es el DECORADOR CONCRETO (ConLeche, ConNata...). El decorador base solo delega.",
+  ejercicios: [
+    { id: "decorator", titulo: "Cafetería", tipo: "programa",
+      tarea: "Completa los decoradores ConCaramelo y ConNata siguiendo el modelo de ConLeche.",
+      pistas: ["Sobrescribe descripcion(): return envuelto.descripcion() + \", caramelo\";", "Sobrescribe costo(): return envuelto.costo() + 0.60;", "Para ConNata: \", nata\" y + 0.50."] },
+    { id: "decorator-texto", titulo: "Formato de texto", tipo: "pruebas",
+      tarea: "Completa el decorador base y los decoradores concretos Negrita, Cursiva y Mayusculas, que se pueden apilar en cualquier orden.",
+      pasos: ["DecoradorTexto: guarda en su constructor el texto que va a decorar.", "Negrita: devuelve <b> + texto.mostrar() + </b>.", "Cursiva: devuelve <i> + texto.mostrar() + </i>.", "Mayusculas: devuelve texto.mostrar().toUpperCase().", "El orden importa: Mayusculas aplicada por fuera también pasa a mayúsculas las etiquetas."],
+      pistas: ["this.texto = texto;", "return \"<b>\" + texto.mostrar() + \"</b>\";", "return texto.mostrar().toUpperCase();"] }
+  ] },
+
+{ id: "composite", nombre: "Composite", cat: "estr",
+  intencion: "Compone objetos en estructuras de árbol y permite tratar igual a los objetos individuales y a los grupos.",
+  problema: "Calcular el tamaño de una carpeta que contiene archivos y otras carpetas. Sin el patrón, llenas el código de instanceof Archivo / instanceof Carpeta.",
+  analogia: "Un ejército: una orden al general baja por divisiones, brigadas y pelotones hasta cada soldado. Todos 'reciben órdenes'.",
+  cuando: ["Tus datos forman una jerarquía parte-todo (árbol)", "Quieres que el cliente ignore si trata con una hoja o un grupo", "Menús, sistemas de archivos, organigramas, UI"],
+  estructura: "ElementoSistema (componente)\n ├─ Archivo (hoja): tamano() = kb\n └─ Carpeta (compuesto)\n      List<ElementoSistema> hijos\n      tamano() = Σ hijo.tamano()",
+  enJava: ["java.awt.Container / Component", "Nodos del DOM (org.w3c.dom.Node)", "Árboles de vistas en JavaFX"],
+  ojo: "La recursión es natural: la carpeta delega en sus hijos sin saber qué son. Cuidado con ciclos (una carpeta que se contiene a sí misma).",
+  ejercicios: [
+    { id: "composite", titulo: "Sistema de archivos", tipo: "programa",
+      tarea: "Implementa tamano() e imprimir() recursivos en Carpeta.",
+      pistas: ["int total = 0; for (ElementoSistema h : hijos) total += h.tamano(); return total;", "En imprimir, tras la línea de la carpeta: for (ElementoSistema h : hijos) h.imprimir(sangria + \"  \");"] },
+    { id: "composite-empresa", titulo: "Organigrama", tipo: "pruebas",
+      tarea: "Completa Empleado (hoja) y Departamento (compuesto) para calcular salarios totales y mostrar el organigrama con sangría.",
+      pasos: ["Empleado.getSalario(): devuelve su salario. mostrar(): [sangria][nombre] ($[salario]).", "Departamento.agregar(): añade un componente (empleado u otro departamento).", "Departamento.getSalario(): suma getSalario() de todos los integrantes, sin preguntar de qué tipo son.", "Departamento.mostrar(): [sangria]Departamento [nombre] (total $[total]) y luego cada integrante con sangria + \"  \"."],
+      pistas: ["System.out.println(sangria + nombre + \" ($\" + salario + \")\");", "int total = 0; for (ComponenteEmpresa c : integrantes) total += c.getSalario(); return total;", "for (ComponenteEmpresa c : integrantes) c.mostrar(sangria + \"  \");"] }
+  ] },
+
+{ id: "dao", nombre: "DAO", cat: "estr",
+  intencion: "Data Access Object: aísla la lógica de acceso a datos detrás de una interfaz, separándola de la lógica de negocio.",
+  problema: "El SQL está repartido por los servicios. Cambiar de MySQL a una API, o hacer un test sin base de datos, obliga a reescribir media aplicación.",
+  analogia: "El bibliotecario: le pides un libro por su código y te lo trae. No sabes si está en el sótano, en otra sede o digitalizado.",
+  cuando: ["Quieres separar persistencia y negocio", "Quieres cambiar el almacenamiento (BD, fichero, API) sin tocar el resto", "Quieres tests rápidos con una implementación en memoria"],
+  estructura: "UsuarioDAO (interfaz CRUD)\n ├─ guardar / buscarPorId / buscarTodos\n ├─ actualizar / eliminar\n ├─ UsuarioDAOEnMemoria (tests)\n └─ UsuarioDAOJdbc (producción)",
+  enJava: ["Repositorios de Spring Data (JpaRepository)", "JDBC con PreparedStatement", "No es del catálogo GoF: es un patrón de arquitectura J2EE"],
+  ojo: "Uso común (pregunta de examen): abstraer la lógica de negocio de la interacción con la base de datos. Devuelve Optional en las búsquedas en vez de null.",
+  ejercicios: [
+    { id: "dao", titulo: "Usuarios en memoria", tipo: "programa",
+      tarea: "Implementa el CRUD completo de UsuarioDAOEnMemoria usando el mapa como 'tabla'.",
+      pistas: ["guardar: Usuario conId = new Usuario(siguienteId++, u.nombre(), u.email()); tabla.put(conId.id(), conId); return conId;", "buscarPorId: return Optional.ofNullable(tabla.get(id));  buscarTodos: return new ArrayList<>(tabla.values());", "actualizar: if (!tabla.containsKey(u.id())) return false; tabla.put(u.id(), u); return true;  eliminar: return tabla.remove(id) != null;"] },
+    { id: "dao-libros", titulo: "Biblioteca", tipo: "pruebas",
+      tarea: "Completa LibroDAOMemoria, la implementación en memoria del contrato LibroDAO.",
+      pasos: ["buscarPorIsbn(): recorre la lista y devuelve el libro con ese ISBN (usa equals), o null.", "agregar(): si ya existe ese ISBN devuelve false; si no, lo agrega y devuelve true.", "listarTodos(): devuelve una copia de la lista, no la lista interna.", "eliminar(): si el libro existe lo quita y devuelve true; si no, false."],
+      pistas: ["for (Libro l : libros) if (l.getIsbn().equals(isbn)) return l; return null;", "if (buscarPorIsbn(libro.getIsbn()) != null) return false; libros.add(libro); return true;", "return new ArrayList<>(libros);  —  Libro l = buscarPorIsbn(isbn); if (l == null) return false; libros.remove(l); return true;"] }
+  ] },
+
+{ id: "facade", nombre: "Facade", cat: "estr",
+  intencion: "Proporciona una interfaz única y simplificada a un conjunto de subsistemas complejos.",
+  problema: "Para hacer una compra hay que llamar al inventario, a pagos, a envíos y a notificaciones en el orden correcto. Cada cliente lo repite y lo hace distinto.",
+  analogia: "El recepcionista de un hotel: le pides un taxi o una cena y él coordina con quien haga falta.",
+  cuando: ["Un subsistema tiene muchas piezas y una secuencia de uso habitual", "Quieres reducir el acoplamiento del cliente con los detalles", "Simplificar la interacción entre un sistema legacy y aplicaciones nuevas"],
+  estructura: "Cliente → TiendaFacade.comprar()\n             ├─ Inventario.reservar()\n             ├─ Pagos.cobrar()\n             ├─ Envios.crearEtiqueta()\n             └─ Notificaciones.email()",
+  enJava: ["SLF4J sobre distintos sistemas de logging", "javax.faces.context.FacesContext", "Clases 'Service' en Spring que orquestan varios repositorios"],
+  ojo: "La fachada no prohíbe usar los subsistemas directamente ni cambia su lógica interna. Si crece demasiado, se convierte en una 'clase dios'.",
+  ejercicios: [
+    { id: "facade", titulo: "Tienda online", tipo: "programa",
+      tarea: "Implementa TiendaFacade.comprar() orquestando los cuatro subsistemas y cancelando si no hay stock.",
+      pistas: ["Campos: private final Inventario inventario = new Inventario(); (y los otros tres).", "if (!inventario.reservar(producto)) return \"CANCELADO\";", "Luego pagos.cobrar(precio); envios.crearEtiqueta(direccion); notificaciones.email(email); return \"OK\";"] },
+    { id: "facade-aula", titulo: "Aula", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa AulaFacade para preparar o cerrar el aula con una sola llamada, coordinando luces, proyector y aire acondicionado.",
+      pasos: ["Constructor: guarda los tres dispositivos recibidos con this. (no crees dispositivos nuevos).", "iniciarClase(): muestra Preparando el aula... y llama a encender() en este orden: luces, proyector, aire.", "finalizarClase(): muestra Cerrando el aula... y llama a apagar() en el mismo orden.", "Cada dispositivo ya imprime su mensaje: no los repitas en la fachada."],
+      pistas: ["this.luces = luces; this.proyector = proyector; this.aire = aire;", "System.out.println(\"Preparando el aula...\"); luces.encender(); proyector.encender(); aire.encender();", "System.out.println(\"Cerrando el aula...\"); luces.apagar(); proyector.apagar(); aire.apagar();"] }
+  ] },
+
+{ id: "proxy", nombre: "Proxy", cat: "estr",
+  intencion: "Proporciona un sustituto de otro objeto para controlar el acceso a él: carga perezosa, caché, seguridad, registro...",
+  problema: "Una galería con 300 fotos en alta resolución. Si las cargas todas al abrirla, tarda una eternidad, aunque el usuario solo vea 2.",
+  analogia: "Una tarjeta de crédito: es un sustituto del dinero que hay en el banco; se usa igual para pagar, y el dinero solo se mueve cuando hace falta.",
+  cuando: ["Proxy VIRTUAL: retrasa la creación del objeto caro hasta que se usa", "Proxy de PROTECCIÓN: comprueba permisos antes de delegar", "Proxy de caché, de registro o remoto"],
+  estructura: "Imagen (interfaz)\n ├─ ImagenReal (cara de crear)\n └─ ProxyImagen\n      ImagenReal real = null\n      mostrar(): if (real == null) real = new ...; real.mostrar()",
+  enJava: ["java.lang.reflect.Proxy", "Spring AOP (@Transactional)", "Carga perezosa de Hibernate", "Mockito (mocks y spies)"],
+  ojo: "Proxy vs Decorator: misma forma, pero el proxy controla el ACCESO (y suele crear él el objeto real), mientras que el decorador AÑADE comportamiento y recibe el objeto desde fuera.",
+  ejercicios: [
+    { id: "proxy", titulo: "Galería (proxy virtual)", tipo: "programa",
+      tarea: "Convierte ProxyImagen en un proxy virtual: no cargar nada al crear la galería y cargar cada imagen una sola vez.",
+      pistas: ["Quita el final del campo: private ImagenReal real;", "Borra la línea this.real = new ImagenReal(fichero); del constructor.", "En mostrar(): if (real == null) real = new ImagenReal(fichero); real.mostrar();"] },
+    { id: "proxy-permiso", titulo: "Permiso sí/no", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa verContenido() de ProxyDocumento: el contenido solo se muestra cuando tienePermiso es true.",
+      pasos: ["Comprueba el valor de tienePermiso.", "Si tiene permiso, pide al documento real que muestre su contenido.", "Si no, muestra exactamente: Acceso denegado. No tienes permiso para ver este documento.", "No modifiques la clase Documento."],
+      pistas: ["if (tienePermiso) { documento.verContenido(); }", "else { System.out.println(\"Acceso denegado. No tienes permiso para ver este documento.\"); }"] },
+    { id: "proxy-roles", titulo: "Documentos por rol", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa ProxyDocumento para verificar el rol antes de acceder y crear el documento real solo cuando haga falta (proxy de protección + virtual).",
+      pasos: ["Constructor: guarda nombre y rol. No crees el DocumentoReal aquí (queda en null).", "mostrar(): el rol tiene permiso si es DOCENTE o ADMINISTRADOR, sin importar mayúsculas (equalsIgnoreCase y ||).", "Si tiene permiso y documentoReal es null, créalo con el nombre guardado.", "Con permiso, llama siempre a documentoReal.mostrar() (recién creado o ya existente).", "Sin permiso: muestra Acceso denegado para el rol: [rol] y no crees nada."],
+      pistas: ["boolean tienePermiso = \"DOCENTE\".equalsIgnoreCase(rol) || \"ADMINISTRADOR\".equalsIgnoreCase(rol);", "if (documentoReal == null) { documentoReal = new DocumentoReal(nombre); } documentoReal.mostrar();", "else { System.out.println(\"Acceso denegado para el rol: \" + rol); }"] }
+  ] },
+
+{ id: "abb", nombre: "Árbol binario de búsqueda", corto: "Árbol binario (ABB)", cat: "algo",
+  intencion: "Estructura de nodos donde, para cada nodo, los valores menores van a la izquierda y los mayores a la derecha.",
+  problema: "Buscar en una lista desordenada es O(n). En un ABB equilibrado, cada comparación descarta la mitad del árbol: O(log n).",
+  analogia: "Adivinar un número del 1 al 100 preguntando '¿es mayor o menor?': cada respuesta descarta una rama entera.",
+  cuando: ["Insertar y buscar manteniendo los datos ordenados", "Recorrer en orden (inorden da los valores de menor a mayor)", "Base de TreeMap / TreeSet (árboles rojo-negro)"],
+  estructura: "Nodo { int valor; Nodo izquierdo; Nodo derecho; }\nArbolBinarioBusqueda\n ├─ private Nodo raiz\n ├─ insertar(v) → insertarRecursivo(raiz, v)\n └─ inOrder()   → izquierdo → nodo → derecho",
+  enJava: ["TreeMap y TreeSet", "Recorridos: preorden, inorden, postorden"],
+  ojo: "Pregunta de examen: en un ABB los valores del subárbol izquierdo son menores que la raíz. No todos los nodos tienen dos hijos. Si insertas datos ya ordenados, el árbol degenera en una lista.",
+  ejercicios: [
+    { id: "abb", titulo: "Insertar y recorrer inorden", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa Nodo y ArbolBinarioBusqueda para insertar enteros (sin repetidos) y recorrerlos en orden ascendente.",
+      pasos: ["Nodo: valor, izquierdo y derecho (los hijos empiezan en null).", "raiz debe ser privado; inOrder() no recibe parámetros y empieza desde la raíz.", "insertar(valor) usa un método recursivo privado: menor a la izquierda, mayor a la derecha, repetidos se ignoran.", "Inorden: subárbol izquierdo → nodo actual → subárbol derecho, imprimiendo valor + \" \"."],
+      pistas: ["if (nodo == null) return new Nodo(valor);", "if (valor < nodo.valor) nodo.izquierdo = insertarRecursivo(nodo.izquierdo, valor); else if (valor > nodo.valor) nodo.derecho = ...; return nodo;", "if (nodo == null) return; inOrderRecursivo(nodo.izquierdo); System.out.print(nodo.valor + \" \"); inOrderRecursivo(nodo.derecho);"] }
+  ] },
+
+{ id: "estructuras", nombre: "Lista, pila y cola", corto: "Lista, pila y cola", cat: "algo",
+  intencion: "Tres formas de guardar una secuencia que se diferencian en por dónde se saca el siguiente elemento.",
+  problema: "Elegir mal la estructura complica el código: deshacer acciones pide una pila; atender pedidos por orden de llegada pide una cola.",
+  analogia: "Pila: platos apilados (sacas el de arriba). Cola: la fila del supermercado (atienden al primero que llegó).",
+  cuando: ["LinkedList: insertar y borrar por valor o posición", "Pila (LIFO): deshacer, recursión, paréntesis balanceados", "Cola (FIFO): turnos, tareas pendientes, recorrido por niveles"],
+  estructura: "LinkedList<String> lista   add / remove(objeto)\nStack<String> pila         push / pop   (LIFO)\nQueue<String> cola         offer / poll (FIFO)\n                           = new LinkedList<>()",
+  enJava: ["java.util.LinkedList", "java.util.Stack (o ArrayDeque como pila)", "java.util.Queue / ArrayDeque"],
+  ojo: "Pregunta de examen: la pila es LIFO (Last In, First Out). pop() sobre una pila vacía lanza EmptyStackException: comprueba isEmpty() antes.",
+  ejercicios: [
+    { id: "tareas-estructuras", titulo: "Gestor de tareas", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa GestionarTareas: la misma tarea se guarda en una lista, una pila y una cola, y cada una elimina según su regla.",
+      pasos: ["Constructor: inicializa lista, pila y cola vacías.", "agregarTarea: añade la tarea a las tres estructuras.", "eliminarTarea: en la lista elimina por nombre; en la pila quita la última (si no está vacía); en la cola quita la primera (si no está vacía).", "imprimirEstado: muestra Lista enlazada: [...], Pilas: [...] y Colas: [...]."],
+      pistas: ["lista = new LinkedList<>(); pila = new Stack<>(); cola = new LinkedList<>();", "lista.add(tarea); pila.push(tarea); cola.offer(tarea);", "lista.remove(tarea); if (!pila.isEmpty()) pila.pop(); if (!cola.isEmpty()) cola.poll();"] }
+  ] },
+
+{ id: "mochila", nombre: "Problema de la mochila", corto: "Mochila (recursión)", cat: "algo",
+  intencion: "Elegir qué objetos meter en una mochila para maximizar el valor total sin superar su capacidad.",
+  problema: "Probar a mano todas las combinaciones es inviable. La recursión decide, objeto por objeto, si conviene incluirlo o no.",
+  analogia: "Preparar el equipaje con límite de peso: para cada cosa te preguntas si vale más llevarla o dejar ese espacio para otra.",
+  cuando: ["Optimización con capacidad limitada (presupuesto, peso, tiempo)", "Ejemplo clásico de recursión y programación dinámica"],
+  estructura: "mochila(valores, pesos, capacidad, n)\n ├─ n == 0 || capacidad == 0  → 0\n ├─ pesos[n-1] > capacidad     → mochila(..., n-1)\n └─ max( valores[n-1] + mochila(..., cap - pesos[n-1], n-1),\n         mochila(..., cap, n-1) )",
+  enJava: ["Recursión", "Memoización con int[][] para evitar recálculos (programación dinámica)"],
+  ojo: "Pregunta de examen: el problema que maximiza el valor total sin exceder una capacidad límite es el de la mochila. La versión recursiva pura es exponencial; con memoización es O(n·capacidad).",
+  ejercicios: [
+    { id: "mochila", titulo: "Mochila 0/1 recursiva", tipo: "pruebas", origen: "UTEC",
+      tarea: "Completa el método recursivo que devuelve el mayor valor que cabe en la mochila. Cada objeto se puede elegir una sola vez.",
+      pasos: ["Caso base: si no quedan objetos (n == 0) o la capacidad es 0, devuelve 0.", "Si el objeto actual (posición n - 1) pesa más que la capacidad, no se incluye.", "Si cabe, compara incluirlo (su valor + mochila con capacidad reducida) con no incluirlo.", "Devuelve el mayor de los dos."],
+      pistas: ["if (n == 0 || capacidad == 0) return 0;", "if (pesos[n - 1] > capacidad) return mochila(valores, pesos, capacidad, n - 1);", "return Math.max(valores[n - 1] + mochila(valores, pesos, capacidad - pesos[n - 1], n - 1), mochila(valores, pesos, capacidad, n - 1));"] }
+  ] }
+];
+
+const PREGUNTAS = [
+  { tema: "Factory Method", p: "¿Cuál es el propósito del patrón Factory Method?", o: ["Definir una familia de objetos relacionados.", "Proveer una manera de construir objetos complejos paso a paso.", "Garantizar que una clase tenga una única instancia.", "Crear objetos sin especificar la clase exacta que se creará."], c: 3, e: "Familias = Abstract Factory; paso a paso = Builder; única instancia = Singleton." },
+  { tema: "Abstract Factory", p: "¿Cuál es la función principal del patrón Abstract Factory?", o: ["Proveer un mecanismo para clonar objetos existentes.", "Garantizar la existencia de una sola instancia de una clase.", "Proveer una interfaz para crear familias de objetos relacionados o dependientes.", "Construir objetos complejos utilizando un proceso paso a paso."], c: 2, e: "Clonar = Prototype; una instancia = Singleton; paso a paso = Builder." },
+  { tema: "Factory Method vs Abstract Factory", p: "¿Cuál es una diferencia clave entre Factory Method y Abstract Factory?", o: ["Factory Method es un patrón estructural, mientras Abstract Factory es creacional.", "Factory Method crea un único objeto, mientras Abstract Factory crea familias de objetos relacionados.", "Factory Method utiliza clonación de objetos, mientras Abstract Factory no.", "Factory Method requiere clases concretas, mientras Abstract Factory no."], c: 1, e: "Los dos son creacionales; ninguno se basa en clonar (eso es Prototype)." },
+  { tema: "Builder", p: "¿Cuál es el propósito principal del patrón Builder?", o: ["Construir objetos complejos paso a paso.", "Definir una jerarquía de clases para crear familias de productos.", "Decidir en tiempo de ejecución qué clase concreta instanciar.", "Crear una única instancia de una clase."], c: 0, e: "Las otras opciones describen Abstract Factory, Factory Method y Singleton." },
+  { tema: "Builder", p: "¿Cuál es una ventaja principal del patrón Builder?", o: ["Separa el proceso de construcción de la representación del objeto.", "Permite crear múltiples instancias únicas.", "Aumenta la velocidad de clonación de objetos existentes.", "Simplifica la jerarquía de herencia en la creación de objetos."], c: 0, e: "Es la definición clásica del GoF: el mismo proceso puede crear distintas representaciones." },
+  { tema: "Decorator", p: "En el patrón Decorator, ¿qué componente es responsable de implementar las operaciones decoradas?", o: ["Componente", "Decorador", "Decorador concreto", "Componente concreto"], c: 2, e: "El decorador base solo envuelve y delega; los decoradores concretos (ConLeche, ConNata) añaden el comportamiento." },
+  { tema: "Proxy", p: "¿Qué tipo de proxy retrasa la creación de un objeto hasta que sea necesario?", o: ["Proxy remoto.", "Proxy virtual.", "Proxy de registro.", "Proxy de protección."], c: 1, e: "Remoto = objeto en otra máquina; protección = permisos; registro = logging de llamadas." },
+  { tema: "Adapter", p: "¿Qué principio de SOLID respeta el patrón Adapter?", o: ["Principio de responsabilidad única.", "Principio de abierto/cerrado.", "Principio de sustitución de Liskov.", "Principio de segregación de interfaces."], c: 1, e: "Respuesta del curso: integras una clase nueva sin modificar el código existente (abierto a extensión, cerrado a modificación)." },
+  { tema: "DAO", p: "¿Cuál es un uso común del patrón DAO?", o: ["Controlar el acceso remoto a un sistema.", "Simplificar la integración de sistemas legacy.", "Abstraer la lógica de negocio de la interacción con bases de datos.", "Proveer representaciones virtuales de objetos costosos."], c: 2, e: "Acceso remoto y objetos costosos = Proxy; integrar legacy = Adapter o Facade." },
+  { tema: "Facade", p: "¿Cuál es un beneficio del patrón Facade al trabajar con sistemas legacy?", o: ["Cambia completamente la lógica interna del sistema.", "Aumenta la velocidad del sistema.", "Permite acceso directo a todos los subsistemas.", "Simplifica la interacción entre el sistema antiguo y nuevas aplicaciones."], c: 3, e: "La fachada no cambia la lógica interna ni la hace más rápida: ofrece una puerta de entrada más simple." },
+  { tema: "Mochila", p: "¿Qué problema busca maximizar el valor total sin exceder una capacidad límite?", o: ["Problema de la Mochila", "Problema del Viajante", "Problema del Clic Máximo", "Problema de Caminos Mínimos"], c: 0, e: "El viajante busca la ruta más corta que visita todas las ciudades." },
+  { tema: "Heapsort", p: "¿Qué tipo de estructura de datos utiliza el algoritmo Heapsort para ordenar?", o: ["Árbol binario de búsqueda.", "Lista enlazada.", "Tabla hash.", "Montículo."], c: 3, e: "Heapsort construye un montículo (heap) y extrae el máximo repetidamente: O(n log n)." },
+  { tema: "Pila", p: "¿Cuál es la operación permitida en una pila?", o: ["FIFO (First In, First Out)", "LIFO (Last In, First Out)", "Acceso aleatorio", "Búsqueda binaria"], c: 1, e: "FIFO es la cola." },
+  { tema: "Árbol binario de búsqueda", p: "¿Cuál es la característica de un árbol binario de búsqueda (BST)?", o: ["Los valores en el subárbol izquierdo son menores que la raíz.", "Todos los nodos tienen exactamente dos hijos.", "Los valores se almacenan en orden descendente.", "No permite duplicados en ningún caso."], c: 0, e: "Los nodos pueden tener 0, 1 o 2 hijos; el recorrido inorden da los valores en orden ascendente." },
+  { tema: "Tabla hash", p: "¿Cuál es la técnica común para manejar colisiones en tablas hash?", o: ["Uso de una cola", "Recorrido por niveles", "Encadenamiento", "Uso de una pila"], c: 2, e: "Encadenamiento: cada posición guarda una lista con todos los elementos que caen ahí. La otra técnica habitual es direccionamiento abierto." },
+  { tema: "Tabla hash", p: "¿Qué problema común puede ocurrir al utilizar una tabla hash?", o: ["Búsqueda binaria", "Colisión", "Subdesbordamiento", "Recursión infinita"], c: 1, e: "Colisión: dos claves distintas dan el mismo índice." },
+  { tema: "Búsqueda binaria", p: "¿Cuál es el requisito para usar la búsqueda binaria clásica?", o: ["La lista debe contener números positivos", "La lista debe ser no ordenada", "La lista debe ser ordenada", "La lista debe ser circular"], c: 2, e: "Cada paso compara con el elemento del medio y descarta la mitad; solo funciona si está ordenada." }
+];
+
+const CATS = { crea: "Creacional", comp: "Comportamiento", estr: "Estructural", algo: "Estructuras y algoritmos" };
+const TODOS_EJ = PATRONES.flatMap(p => p.ejercicios);
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+const store = {
+  get(k, d) { try { const v = localStorage.getItem("patrones:" + k); return v === null ? d : JSON.parse(v); } catch { return d; } },
+  set(k, v) { try { localStorage.setItem("patrones:" + k, JSON.stringify(v)); } catch {} }
+};
+let hechos = new Set(store.get("hechos", []));
+const cache = {};
+let actual = null;
+
+/* ---------- Resaltado de sintaxis Java (un solo paso) ---------- */
+const KW = "abstract|assert|boolean|break|byte|case|catch|char|class|const|continue|default|do|double|else|enum|extends|final|finally|float|for|if|implements|import|instanceof|int|interface|long|native|new|package|private|protected|public|record|return|short|static|super|switch|synchronized|this|throw|throws|transient|try|var|void|volatile|while|true|false|null";
+const RE = new RegExp(`(\\/\\/[^\\n]*|\\/\\*[\\s\\S]*?\\*\\/)|("(?:[^"\\\\\\n]|\\\\.)*"|'(?:[^'\\\\\\n]|\\\\.)*')|(@\\w+)|\\b(${KW})\\b|\\b(\\d[\\d_]*(?:\\.\\d+)?[LlFfDd]?)\\b|\\b([A-Z]\\w*)\\b`, "g");
+function resaltar(src) {
+  let out = "", i = 0, m;
+  RE.lastIndex = 0;
+  while ((m = RE.exec(src))) {
+    out += esc(src.slice(i, m.index));
+    const t = esc(m[0]);
+    if (m[1]) out += `<span class="tk-c">${t.replace(/\bTODO\b[^\n]*/g, x => `<span class="tk-todo">${x}</span>`)}</span>`;
+    else if (m[2]) out += `<span class="tk-s">${t}</span>`;
+    else if (m[3]) out += `<span class="tk-a">${t}</span>`;
+    else if (m[4]) out += `<span class="tk-k">${t}</span>`;
+    else if (m[5]) out += `<span class="tk-n">${t}</span>`;
+    else out += `<span class="tk-t">${t}</span>`;
+    i = m.index + m[0].length;
+  }
+  return out + esc(src.slice(i)) + "\n";
+}
+
+/* ---------- Navegación ---------- */
+function pintarLista() {
+  const lista = $("#lista");
+  let html = "";
+  for (const cat of ["crea", "comp", "estr", "algo"]) {
+    html += `<div class="grupo ${cat}">${CATS[cat]}</div>`;
+    for (const p of PATRONES.filter(p => p.cat === cat)) {
+      const n = p.ejercicios.filter(e => hechos.has(e.id)).length, t = p.ejercicios.length;
+      const clase = n === t ? "hecho" : n > 0 ? "parcial" : "";
+      html += `<button class="item ${clase}" data-id="${p.id}" aria-current="${actual === p.id}"><span class="check">✓</span>${p.corto || p.nombre}${t > 1 ? `<span class="cuenta">${n}/${t}</span>` : ""}</button>`;
+    }
+  }
+  html += `<div class="grupo extra">Repaso</div>
+    <button class="item" data-id="test" aria-current="${actual === "test"}"><span class="check" style="border-style:dashed"></span>Test teórico<span class="cuenta">${PREGUNTAS.length}</span></button>
+    <button class="item" data-id="comparar" aria-current="${actual === "comparar"}"><span class="check" style="border-style:dashed"></span>Comparativas</button>`;
+  lista.innerHTML = html;
+  lista.querySelectorAll("button").forEach(b => b.onclick = () => abrir(b.dataset.id));
+  const n = TODOS_EJ.filter(e => hechos.has(e.id)).length;
+  $("#barra-progreso").style.width = (n / TODOS_EJ.length * 100) + "%";
+  $("#txt-progreso").textContent = `${n} de ${TODOS_EJ.length} ejercicios superados`;
+}
+
+const leerPruebas = txt => txt.replace(/\r\n/g, "\n").split(/^### PRUEBA\n/m).filter(b => b.trim()).map(b => {
+  const [c, e = ""] = b.split(/^### ESPERADO\n/m);
+  return { codigo: c.trimEnd(), esperado: e.trimEnd() };
+});
+
+async function cargar(ej) {
+  if (cache[ej.id]) return cache[ej.id];
+  const extra = ej.tipo === "pruebas" ? "pruebas.txt" : "esperado.txt";
+  const [inicio, solucion, otro] = await Promise.all(
+    ["inicio.java", "solucion.java", extra].map(f => fetch(`ejercicios/${ej.id}/${f}`, { cache: "no-store" }).then(r => { if (!r.ok) throw new Error(f); return r.text(); })));
+  return cache[ej.id] = ej.tipo === "pruebas" ? { inicio, solucion, pruebas: leerPruebas(otro) } : { inicio, solucion, esperado: otro };
+}
+
+function abrir(id) {
+  actual = id;
+  try { location.hash = id; } catch {}
+  pintarLista();
+  if (id === "comparar") return pintarComparativas();
+  if (id === "test") return pintarTest();
+  const p = PATRONES.find(x => x.id === id);
+  if (!p) return abrir("builder");
+  $("#main").innerHTML = `
+    <div class="cabecera"><h2>${esc(p.nombre)}</h2><span class="chip ${p.cat}">${CATS[p.cat]}</span></div>
+    <p class="intencion">${esc(p.intencion)}</p>
+    <div class="teoria">
+      <div class="tarjeta"><h3>Problema que resuelve</h3><p>${esc(p.problema)}</p></div>
+      <div class="tarjeta"><h3>Analogía</h3><p>${esc(p.analogia)}</p></div>
+      <div class="tarjeta"><h3>Úsalo cuando</h3><ul>${p.cuando.map(c => `<li>${esc(c)}</li>`).join("")}</ul></div>
+      <div class="tarjeta"><h3>Estructura</h3><pre>${esc(p.estructura)}</pre></div>
+      <div class="tarjeta"><h3>Ya lo usas en Java</h3><ul>${p.enJava.map(c => `<li><code>${esc(c)}</code></li>`).join("")}</ul></div>
+      <div class="tarjeta"><h3>Ojo con</h3><p>${esc(p.ojo)}</p></div>
+    </div>
+    <div class="sel-ej" id="sel-ej"></div>
+    <div id="zona-ej"></div>`;
+  const elegido = store.get("ej:" + p.id, p.ejercicios[0].id);
+  abrirEjercicio(p, p.ejercicios.find(e => e.id === elegido) || p.ejercicios[0]);
+}
+
+function pintarSelector(p, ej) {
+  const sel = $("#sel-ej");
+  if (!sel) return;
+  sel.innerHTML = `<span class="rotulo">Ejercicios</span>` + p.ejercicios.map((e, i) =>
+    `<button data-ej="${e.id}" aria-pressed="${e.id === ej.id}">${hechos.has(e.id) ? '<span class="ok-mini">✓</span>' : ""}${i + 1} · ${esc(e.titulo)}${e.origen ? ` <span class="origen">${e.origen}</span>` : ""}</button>`).join("");
+  sel.querySelectorAll("button").forEach(b => b.onclick = () => abrirEjercicio(p, p.ejercicios.find(e => e.id === b.dataset.ej)));
+}
+
+async function abrirEjercicio(p, ej) {
+  store.set("ej:" + p.id, ej.id);
+  pintarSelector(p, ej);
+  const esPruebas = ej.tipo === "pruebas";
+  $("#zona-ej").innerHTML = `
+    <div class="ejercicio">
+      <h3>${esc(ej.titulo)}${ej.origen ? ` <span class="origen">Ejercicio ${ej.origen}</span>` : ""}</h3>
+      <div>${esc(ej.tarea)}</div>
+      ${ej.pasos ? `<ol>${ej.pasos.map(s => `<li>${esc(s)}</li>`).join("")}</ol>` : ""}
+      <div class="modo">${esPruebas
+        ? "Modo CodeRunner: escribe solo las clases (sin <code>main</code>). Cada prueba se ejecuta por separado con su propio <code>main</code>."
+        : "Busca los comentarios <code>TODO</code> y ejecuta hasta que la salida coincida con la esperada."}</div>
+      <div class="pistas" id="pistas"><button id="btn-pista">Mostrar una pista (${ej.pistas.length})</button></div>
+    </div>
+    <div id="aviso"></div>
+    <div class="barra">
+      <button class="btn primario" id="btn-run">▶ ${esPruebas ? "Comprobar" : "Ejecutar"}</button>
+      <button class="btn" id="btn-reset">Reiniciar código</button>
+      <button class="btn" id="btn-sol">Ver solución</button>
+      <span class="atajo">Ctrl + Enter ${esPruebas ? "comprueba" : "ejecuta"} · Tab indenta</span>
+    </div>
+    <div class="lab">
+      <div class="editor">
+        <div class="gutter" id="gutter"></div>
+        <div class="zona"><pre id="hl" aria-hidden="true"></pre><textarea id="code" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="Editor de código Java"></textarea></div>
+      </div>
+      <div class="consola">
+        <div class="con-cab"><b>Consola</b><span class="estado" id="estado">Listo</span></div>
+        <div class="con-tabs" role="tablist" id="con-tabs"></div>
+        <div class="con-cuerpo" id="con"></div>
+        <div class="veredicto" id="veredicto" hidden></div>
+      </div>
+    </div>`;
+
+  let pistasVistas = 0;
+  $("#btn-pista").onclick = () => {
+    const el = document.createElement("p");
+    el.textContent = `Pista ${pistasVistas + 1}: ${ej.pistas[pistasVistas]}`;
+    $("#pistas").appendChild(el);
+    pistasVistas++;
+    if (pistasVistas >= ej.pistas.length) $("#btn-pista").remove();
+    else $("#btn-pista").textContent = `Otra pista (${ej.pistas.length - pistasVistas})`;
+  };
+
+  let datos;
+  try { datos = await cargar(ej); }
+  catch { $("#aviso").innerHTML = `<div class="aviso">No se pudieron cargar los ejercicios. Abre la página desde el servidor: ejecuta <code>java Servidor.java</code> en la carpeta del laboratorio y entra en <code>http://localhost:8765</code>.</div>`; return; }
+  if (!$("#code") || store.get("ej:" + p.id) !== ej.id) return;
+
+  const ta = $("#code");
+  ta.value = store.get("code:" + ej.id, datos.inicio);
+  const refrescar = () => {
+    $("#hl").innerHTML = resaltar(ta.value);
+    const n = ta.value.split("\n").length;
+    $("#gutter").textContent = Array.from({ length: n }, (_, i) => i + 1).join("\n") + "\n";
+    sincronizar();
+  };
+  const sincronizar = () => { $("#hl").scrollTop = ta.scrollTop; $("#hl").scrollLeft = ta.scrollLeft; $("#gutter").scrollTop = ta.scrollTop; };
+  ["keyup", "click", "select"].forEach(ev => ta.addEventListener(ev, () => requestAnimationFrame(sincronizar)));
+  let guardarT;
+  ta.addEventListener("input", () => { refrescar(); clearTimeout(guardarT); guardarT = setTimeout(() => store.set("code:" + ej.id, ta.value), 300); });
+  ta.addEventListener("scroll", sincronizar);
+  ta.addEventListener("keydown", e => teclas(e, ta, ejecutar));
+  refrescar();
+
+  // Pestañas de la consola según el tipo de ejercicio
+  const TABS = esPruebas ? [["resultado", "Resultado"], ["pruebas", `Pruebas (${datos.pruebas.length})`]]
+                         : [["salida", "Salida"], ["esperada", "Salida esperada"], ["diff", "Comparación"]];
+  $("#con-tabs").innerHTML = TABS.map(([k, t], i) => `<button role="tab" data-tab="${k}" aria-selected="${i === 0}">${t}</button>`).join("");
+  const ultimo = { html: null, salida: null };
+  const mostrarTab = t => {
+    $("#con-tabs").querySelectorAll("button").forEach(b => b.setAttribute("aria-selected", b.dataset.tab === t));
+    const con = $("#con");
+    const vacio = `<span class="dim">Pulsa ${esPruebas ? "Comprobar" : "Ejecutar"} para compilar con javac y ver el resultado aquí.</span>`;
+    if (t === "pruebas") con.innerHTML = listaPruebas(datos.pruebas);
+    else if (t === "esperada") con.innerHTML = esc(datos.esperado);
+    else if (t === "diff") con.innerHTML = ultimo.salida === null ? `<span class="dim">Ejecuta primero tu código.</span>` : diff(datos.esperado, ultimo.salida);
+    else con.innerHTML = ultimo.html ?? vacio;
+  };
+  $("#con-tabs").querySelectorAll("button").forEach(b => b.onclick = () => mostrarTab(b.dataset.tab));
+  mostrarTab(TABS[0][0]);
+
+  const marcarHecho = () => { hechos.add(ej.id); store.set("hechos", [...hechos]); pintarLista(); pintarSelector(p, ej); };
+
+  async function ejecutar() {
+    const btn = $("#btn-run");
+    btn.disabled = true;
+    const est = $("#estado"), v = $("#veredicto");
+    est.className = "estado"; est.textContent = "Compilando…";
+    v.hidden = true;
+    store.set("code:" + ej.id, ta.value);
+    let r, armado;
+    try {
+      if (esPruebas) {
+        armado = armarPruebas(ta.value, datos.pruebas);
+        est.textContent = `Compilando y ejecutando ${datos.pruebas.length} pruebas…`;
+        r = await (await fetch(`/api/test?n=${datos.pruebas.length}`, { method: "POST", headers: { "Content-Type": "text/plain; charset=utf-8" }, body: armado.src })).json();
+      } else {
+        r = await (await fetch("/api/run", { method: "POST", headers: { "Content-Type": "text/plain; charset=utf-8" }, body: ta.value })).json();
+      }
+    } catch {
+      btn.disabled = false;
+      est.className = "estado bad"; est.textContent = "Sin servidor";
+      ultimo.html = `<span class="err">No hay conexión con el compilador (o el servidor es una versión antigua).\nCierra la ventana del servidor y vuelve a abrir iniciar.cmd.</span>`;
+      mostrarTab(TABS[0][0]); return;
+    }
+    btn.disabled = false;
+    if (!$("#code") || store.get("ej:" + p.id) !== ej.id) return;
+
+    if (r.fase === "compilacion") {
+      est.className = "estado bad"; est.textContent = "Error de compilación";
+      const txt = esPruebas ? mapearLineas(r.salida || "", armado) : (r.salida || "").replace(/^.*Main\.java:/gm, "Línea ");
+      ultimo.html = `<span class="err">${esc(txt)}</span>`;
+      ultimo.salida = "";
+      v.hidden = false; v.className = "veredicto bad"; v.textContent = "No compila. Revisa la línea indicada.";
+      mostrarTab(TABS[0][0]); return;
+    }
+
+    if (esPruebas) {
+      const res = datos.pruebas.map((pr, i) => {
+        const x = r.resultados[i] || { salida: "", codigo: -1 };
+        return { ...pr, obtenido: x.salida, codigo: x.codigo, ms: x.ms, timeout: x.timeout, ok: x.codigo === 0 && normal(x.salida) === normal(pr.esperado) };
+      });
+      const n = res.filter(x => x.ok).length;
+      ultimo.html = res.map((x, i) => bloquePrueba(x, i)).join("");
+      const todo = n === res.length;
+      est.className = "estado " + (todo ? "ok" : "bad");
+      est.textContent = `${n}/${res.length} pruebas`;
+      v.hidden = false;
+      v.className = "veredicto " + (todo ? "ok" : "bad");
+      v.textContent = todo ? `✓ Todas las pruebas superadas (${n}/${res.length}).` : `${n} de ${res.length} pruebas superadas. Abre las marcadas con ✗ para ver la diferencia.`;
+      if (todo) marcarHecho();
+      mostrarTab("resultado");
+      return;
+    }
+
+    const salida = r.salida || "";
+    ultimo.salida = salida;
+    if (r.timeout) {
+      est.className = "estado warn"; est.textContent = "Tiempo agotado (10 s)";
+      ultimo.html = esc(salida) + `\n<span class="err">El programa tardó más de 10 segundos y se detuvo. ¿Hay un bucle infinito?</span>`;
+    } else {
+      const errIdx = salida.search(/^Exception in thread/m);
+      ultimo.html = errIdx >= 0 ? esc(salida.slice(0, errIdx)) + `<span class="err">${esc(salida.slice(errIdx))}</span>` : esc(salida);
+      if (!salida) ultimo.html = `<span class="dim">(el programa no imprimió nada)</span>`;
+      ultimo.html += `\n<span class="dim">— terminó con código ${r.codigo} en ${r.ms} ms —</span>`;
+      const ok = r.codigo === 0 && normal(salida) === normal(datos.esperado);
+      est.className = "estado " + (ok ? "ok" : r.codigo === 0 ? "warn" : "bad");
+      est.textContent = ok ? "Correcto" : r.codigo === 0 ? "Salida distinta" : "Excepción";
+      v.hidden = false;
+      if (ok) { v.className = "veredicto ok"; v.textContent = "✓ Ejercicio superado: la salida coincide con la esperada."; marcarHecho(); }
+      else {
+        v.className = "veredicto bad";
+        v.textContent = r.codigo !== 0 ? "El programa lanzó una excepción. Revisa los TODO pendientes." : `La salida no coincide (línea ${primeraDiferencia(datos.esperado, salida)}). Mira la pestaña Comparación.`;
+      }
+    }
+    mostrarTab(r.codigo === 0 && normal(salida) !== normal(datos.esperado) ? "diff" : "salida");
+  }
+
+  $("#btn-run").onclick = ejecutar;
+  $("#btn-reset").onclick = () => {
+    const b = $("#btn-reset");
+    if (b.dataset.confirm) { ta.value = datos.inicio; store.set("code:" + ej.id, ta.value); refrescar(); b.textContent = "Reiniciar código"; delete b.dataset.confirm; return; }
+    b.dataset.confirm = "1"; b.textContent = "¿Seguro? Pulsa otra vez";
+    setTimeout(() => { if (b.isConnected) { b.textContent = "Reiniciar código"; delete b.dataset.confirm; } }, 3000);
+  };
+  $("#btn-sol").onclick = () => {
+    const b = $("#btn-sol");
+    if (b.dataset.sol) { ta.value = b.dataset.prev; delete b.dataset.sol; b.textContent = "Ver solución"; }
+    else { b.dataset.prev = ta.value; b.dataset.sol = "1"; ta.value = datos.solucion; b.textContent = "Volver a mi código"; }
+    refrescar();
+  };
+}
+
+/* ---------- Modo CodeRunner ---------- */
+// Junta las clases del alumno + una clase Prueba<i> por cada prueba (cada una con su main).
+// En un único Main.java solo puede haber una clase public, así que se quita "public" de las clases de nivel superior.
+function armarPruebas(usuario, pruebas) {
+  const u = usuario.replace(/^(\s*)public\s+((?:abstract\s+|final\s+)*)(class|interface|enum|record)\b/gm, "$1$2$3");
+  let src = u + "\n\npublic class Main { public static void main(String[] args) { } }\n";
+  const inicios = [];
+  pruebas.forEach((pr, i) => {
+    src += `\nclass Prueba${i + 1} { public static void main(String[] args) throws Exception {\n`;
+    inicios.push(src.split("\n").length);
+    src += pr.codigo + "\n} }\n";
+  });
+  return { src, lineasUsuario: usuario.split("\n").length, inicios };
+}
+function mapearLineas(txt, armado) {
+  return txt.replace(/^.*Main\.java:(\d+):/gm, (_, n) => {
+    n = +n;
+    if (n <= armado.lineasUsuario) return `Línea ${n}:`;
+    for (let k = armado.inicios.length - 1; k >= 0; k--) if (n >= armado.inicios[k]) return `Prueba ${k + 1}, línea ${n - armado.inicios[k] + 1}:`;
+    return `Código de prueba:`;
+  });
+}
+function bloquePrueba(x, i) {
+  const estado = x.ok ? "ok" : "mal";
+  const obt = x.timeout ? x.obtenido + "\n(tiempo agotado)" : x.obtenido;
+  return `<details class="prueba ${estado}" ${x.ok ? "" : "open"}>
+    <summary><span class="marca">${x.ok ? "✓" : "✗"}</span><b>Prueba ${i + 1}</b><span class="ms">${x.ms ?? ""} ms</span></summary>
+    <div class="bloques">
+      <div class="bloque"><b>Prueba</b><pre>${esc(x.codigo)}</pre></div>
+      <div class="bloque"><b>Esperado</b><pre class="esp">${esc(x.esperado) || " "}</pre></div>
+      <div class="bloque"><b>Obtenido</b><pre class="${x.ok ? "esp" : "obt-mal"}">${esc(obt.replace(/\s+$/, "")) || "(nada)"}</pre></div>
+    </div></details>`;
+}
+function listaPruebas(pruebas) {
+  return pruebas.map((x, i) => `<details class="prueba pend" open>
+    <summary><span class="marca">•</span><b>Prueba ${i + 1}</b></summary>
+    <div class="bloques">
+      <div class="bloque"><b>Prueba</b><pre>${esc(x.codigo)}</pre></div>
+      <div class="bloque"><b>Resultado esperado</b><pre class="esp">${esc(x.esperado) || " "}</pre></div>
+    </div></details>`).join("");
+}
+
+/* ---------- Teclado del editor ---------- */
+function teclas(e, ta, ejecutar) {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); ejecutar(); return; }
+  if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "s") { e.preventDefault(); return; }
+  const { selectionStart: s, selectionEnd: f, value: v } = ta;
+  const insertar = (txt, ini = s, fin = f) => { ta.setRangeText(txt, ini, fin, "end"); ta.dispatchEvent(new Event("input")); };
+  if (e.key === "Tab") {
+    e.preventDefault();
+    const iniLinea = v.lastIndexOf("\n", s - 1) + 1;
+    if (s !== f && v.slice(s, f).includes("\n") || e.shiftKey) {
+      const bloque = v.slice(iniLinea, f);
+      const nuevo = e.shiftKey ? bloque.replace(/^ {1,4}/gm, "") : bloque.replace(/^/gm, "    ");
+      ta.setRangeText(nuevo, iniLinea, f, "select"); ta.dispatchEvent(new Event("input"));
+    } else insertar("    ");
+  } else if (e.key === "Enter") {
+    e.preventDefault();
+    const iniLinea = v.lastIndexOf("\n", s - 1) + 1;
+    const linea = v.slice(iniLinea, s);
+    let sangria = linea.match(/^\s*/)[0];
+    if (/\{\s*$/.test(linea)) sangria += "    ";
+    if (/^\s*\}/.test(v.slice(s)) && /\{\s*$/.test(linea)) { insertar("\n" + sangria + "\n" + sangria.slice(4)); ta.selectionStart = ta.selectionEnd = s + 1 + sangria.length; return; }
+    insertar("\n" + sangria);
+  } else if (e.key === "}") {
+    const iniLinea = v.lastIndexOf("\n", s - 1) + 1;
+    if (/^\s{4,}$/.test(v.slice(iniLinea, s))) { e.preventDefault(); insertar(v.slice(iniLinea, s - 4) + "}", iniLinea, f); }
+  }
+}
+
+/* ---------- Comparación de salidas ---------- */
+const normal = s => String(s).replace(/\r\n/g, "\n").split("\n").map(l => l.trimEnd()).join("\n").trim();
+function primeraDiferencia(a, b) {
+  const x = normal(a).split("\n"), y = normal(b).split("\n");
+  for (let i = 0; i < Math.max(x.length, y.length); i++) if (x[i] !== y[i]) return i + 1;
+  return 0;
+}
+function diff(esperado, obtenido) {
+  const x = normal(esperado).split("\n"), y = normal(obtenido).split("\n");
+  let html = `<span class="dim">✓ = línea correcta · ✗ = diferente (esperado / obtenido)</span>\n\n`;
+  for (let i = 0; i < Math.max(x.length, y.length); i++) {
+    if (x[i] === y[i]) html += `<div class="diff-l"><span class="okl">✓</span><span>${esc(x[i])}</span></div>`;
+    else html += `<div class="diff-l mal"><span class="err">✗</span><span><span class="okl">${x[i] === undefined ? "(sin línea)" : esc(x[i])}</span>\n<span class="err">${y[i] === undefined ? "(falta esta línea)" : esc(y[i])}</span></span></div>`;
+  }
+  return html;
+}
+
+/* ---------- Test teórico ---------- */
+function pintarTest() {
+  const resp = store.get("test", {});
+  const main = $("#main");
+  const marcador = () => {
+    const contestadas = Object.keys(resp).length;
+    const bien = PREGUNTAS.filter((q, i) => resp[i] === q.c).length;
+    return `<span class="marcador"><b>${bien}</b> correctas de ${contestadas} respondidas · ${PREGUNTAS.length} preguntas</span>`;
+  };
+  main.innerHTML = `
+    <div class="cabecera"><h2>Test teórico</h2><span class="chip algo">Pre-evaluación UTEC</span></div>
+    <p class="intencion">Las preguntas de opción múltiple de tu pre-evaluación, sin repetidas. Elige una respuesta para ver si es correcta y por qué.</p>
+    <div class="quiz-cab"><span id="marcador">${marcador()}</span><button class="btn" id="btn-reiniciar-test">Empezar de nuevo</button></div>
+    <div id="preguntas"></div>`;
+  const cont = $("#preguntas");
+  cont.innerHTML = PREGUNTAS.map((q, i) => `
+    <div class="pregunta" id="preg-${i}">
+      <div class="tema">${esc(q.tema)}</div>
+      <h3><span class="num">${i + 1}.</span><span>${esc(q.p)}</span></h3>
+      <div class="opciones">${q.o.map((op, j) => `<button data-i="${i}" data-j="${j}"><span class="letra">${"abcd"[j]}.</span><span>${esc(op)}</span></button>`).join("")}</div>
+      <div class="explicacion" hidden></div>
+    </div>`).join("");
+  const pintarPregunta = i => {
+    const q = PREGUNTAS[i], el = $(`#preg-${i}`), r = resp[i];
+    el.querySelectorAll("button").forEach(b => {
+      const j = +b.dataset.j;
+      b.disabled = r !== undefined;
+      b.classList.toggle("correcta", r !== undefined && j === q.c);
+      b.classList.toggle("incorrecta", r !== undefined && j === r && r !== q.c);
+    });
+    const ex = el.querySelector(".explicacion");
+    ex.hidden = r === undefined;
+    if (r !== undefined) ex.textContent = (r === q.c ? "✓ Correcto. " : `✗ La respuesta correcta es la ${"abcd"[q.c]}. `) + q.e;
+  };
+  cont.querySelectorAll(".opciones button").forEach(b => b.onclick = () => {
+    const i = +b.dataset.i;
+    resp[i] = +b.dataset.j; store.set("test", resp);
+    pintarPregunta(i); $("#marcador").innerHTML = marcador();
+  });
+  PREGUNTAS.forEach((_, i) => pintarPregunta(i));
+  $("#btn-reiniciar-test").onclick = () => { for (const k in resp) delete resp[k]; store.set("test", resp); pintarTest(); };
+}
+
+/* ---------- Comparativas ---------- */
+function pintarComparativas() {
+  $("#main").innerHTML = `
+    <div class="cabecera"><h2>Comparativas</h2></div>
+    <p class="intencion">Los patrones que más se confunden en entrevistas y exámenes, cara a cara.</p>
+    <h3>Patrones que envuelven otro objeto</h3>
+    <div class="scroll-x"><table class="comp">
+      <tr><th>Patrón</th><th>¿Cambia la interfaz?</th><th>Objetivo</th><th>Pregunta clave</th></tr>
+      <tr><td><b>Adapter</b></td><td>Sí, la convierte en otra</td><td>Hacer compatible algo incompatible</td><td>¿Tengo un enchufe que no encaja?</td></tr>
+      <tr><td><b>Decorator</b></td><td>No, la mantiene</td><td>Añadir comportamiento por capas</td><td>¿Quiero sumar extras combinables?</td></tr>
+      <tr><td><b>Proxy</b></td><td>No, la mantiene</td><td>Controlar el acceso (virtual, protección, caché, remoto)</td><td>¿Quiero decidir cuándo y quién accede?</td></tr>
+      <tr><td><b>Facade</b></td><td>Crea una nueva, más simple</td><td>Ocultar varios subsistemas</td><td>¿Hay demasiadas piezas que coordinar?</td></tr>
+    </table></div>
+    <h3>Tipos de Proxy</h3>
+    <div class="scroll-x"><table class="comp">
+      <tr><th>Tipo</th><th>Qué hace</th><th>Ejercicio</th></tr>
+      <tr><td><b>Virtual</b></td><td>Retrasa la creación del objeto costoso hasta que se necesita</td><td>Galería · Documentos por rol</td></tr>
+      <tr><td><b>Protección</b></td><td>Comprueba permisos antes de delegar</td><td>Permiso sí/no · Documentos por rol</td></tr>
+      <tr><td><b>Remoto</b></td><td>Representa un objeto que vive en otra máquina</td><td>—</td></tr>
+      <tr><td><b>Registro</b></td><td>Anota cada llamada antes de delegar</td><td>—</td></tr>
+    </table></div>
+    <h3>Patrones de creación</h3>
+    <div class="scroll-x"><table class="comp">
+      <tr><th>Patrón</th><th>Crea…</th><th>Cómo</th><th>Pista para reconocerlo</th></tr>
+      <tr><td><b>Builder</b></td><td>Un objeto complejo</td><td>Paso a paso y build() al final</td><td>Métodos encadenados que devuelven this</td></tr>
+      <tr><td><b>Factory Method</b></td><td>Un producto</td><td>Una subclase sobrescribe el método creador</td><td>Método abstracto crearX() + herencia</td></tr>
+      <tr><td><b>Abstract Factory</b></td><td>Una familia de productos</td><td>Un objeto fábrica con varios crearX()</td><td>Varias fábricas intercambiables</td></tr>
+      <tr><td><b>Prototype</b></td><td>Copias</td><td>Clonando un objeto existente</td><td>Método clonar() o constructor de copia</td></tr>
+      <tr><td><b>Singleton</b></td><td>Una sola instancia</td><td>Constructor privado + acceso estático</td><td>getInstancia()</td></tr>
+    </table></div>
+    <h3>Comportamiento</h3>
+    <div class="scroll-x"><table class="comp">
+      <tr><th>Patrón</th><th>Relación</th><th>Quién decide</th><th>Ejemplo típico</th></tr>
+      <tr><td><b>Observer</b></td><td>Uno a muchos, por eventos</td><td>El sujeto avisa cuando cambia</td><td>Listeners, notificaciones, eventos de UI</td></tr>
+      <tr><td><b>Strategy</b></td><td>Uno a uno, intercambiable</td><td>El cliente elige el algoritmo</td><td>Comparator, métodos de pago, descuentos</td></tr>
+    </table></div>
+    <h3>Estructuras de datos</h3>
+    <div class="scroll-x"><table class="comp">
+      <tr><th>Estructura</th><th>Regla</th><th>Operaciones en Java</th></tr>
+      <tr><td><b>Pila</b></td><td>LIFO: sale el último que entró</td><td>push · pop · peek</td></tr>
+      <tr><td><b>Cola</b></td><td>FIFO: sale el primero que entró</td><td>offer · poll · peek</td></tr>
+      <tr><td><b>ABB</b></td><td>Izquierda menor, derecha mayor; inorden = ascendente</td><td>TreeMap · TreeSet</td></tr>
+      <tr><td><b>Tabla hash</b></td><td>Índice = hash(clave); colisiones por encadenamiento</td><td>HashMap · HashSet</td></tr>
+      <tr><td><b>Montículo</b></td><td>El padre es mayor (o menor) que sus hijos; base de Heapsort</td><td>PriorityQueue</td></tr>
+    </table></div>`;
+}
+
+pintarLista();
+const inicial = (location.hash || "").slice(1);
+abrir(PATRONES.some(p => p.id === inicial) || inicial === "comparar" || inicial === "test" ? inicial : "builder");
+window.addEventListener("hashchange", () => { const h = location.hash.slice(1); if (h && h !== actual) abrir(h); });
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Sin descuento: 120.00
+10% de descuento: 108.00
+15 EUR de descuento: 105.00
+Black Friday (lambda): 60.00
+Descuento mayor que el total: 0.00

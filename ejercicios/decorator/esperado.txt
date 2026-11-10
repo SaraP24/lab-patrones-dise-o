@@ -1,0 +1,4 @@
+Café -> 1.50
+Café, leche -> 1.90
+Café, leche, caramelo, nata -> 3.00
+Café, leche, leche -> 2.30

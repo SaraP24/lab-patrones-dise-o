@@ -1,0 +1,9 @@
+== Compra 1 ==
+Inventario: reservado Teclado
+Pago: cobrados 59.90 EUR
+Envío: etiqueta para Calle Mayor 1
+Email: confirmación a ana@mail.com
+Resultado: OK
+== Compra 2 ==
+Inventario: sin stock de Monitor
+Resultado: CANCELADO

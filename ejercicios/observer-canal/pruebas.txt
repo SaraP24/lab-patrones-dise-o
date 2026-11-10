@@ -1,0 +1,38 @@
+### PRUEBA
+Canal canal = new Canal("CodigoFacil");
+canal.suscribir(new Usuario("Ana"));
+canal.suscribir(new Usuario("Luis"));
+canal.subirVideo("Patrones de diseño en 10 minutos");
+### ESPERADO
+CodigoFacil publicó: Patrones de diseño en 10 minutos
+Ana recibió aviso de CodigoFacil: Patrones de diseño en 10 minutos
+Luis recibió aviso de CodigoFacil: Patrones de diseño en 10 minutos
+### PRUEBA
+Canal canal = new Canal("CodigoFacil");
+Usuario ana = new Usuario("Ana");
+Usuario luis = new Usuario("Luis");
+canal.suscribir(ana);
+canal.suscribir(luis);
+canal.desuscribir(ana);
+canal.subirVideo("Observer explicado");
+### ESPERADO
+CodigoFacil publicó: Observer explicado
+Luis recibió aviso de CodigoFacil: Observer explicado
+### PRUEBA
+Canal canal = new Canal("Vacío");
+canal.subirVideo("Nadie me ve");
+System.out.println("Suscriptores: " + canal.cantidadSuscriptores());
+### ESPERADO
+Vacío publicó: Nadie me ve
+Suscriptores: 0
+### PRUEBA
+Canal canal = new Canal("Java Uy");
+canal.suscribir(new Usuario("Sofía"));
+canal.suscribir((nombreCanal, video) -> System.out.println("Bot guardó: " + video));
+System.out.println("Suscriptores: " + canal.cantidadSuscriptores());
+canal.subirVideo("Lambdas como observadores");
+### ESPERADO
+Suscriptores: 2
+Java Uy publicó: Lambdas como observadores
+Sofía recibió aviso de Java Uy: Lambdas como observadores
+Bot guardó: Lambdas como observadores

@@ -1,0 +1,7 @@
+Guardado: Usuario[id=1, nombre=Ana, email=ana@mail.com]
+Guardado: Usuario[id=2, nombre=Luis, email=luis@mail.com]
+Buscar 1: Usuario[id=1, nombre=Ana, email=ana@mail.com]
+Actualizado: Usuario[id=1, nombre=Ana García, email=ana@mail.com]
+Eliminado 2: true
+Buscar 2: no encontrado
+Total usuarios: 1

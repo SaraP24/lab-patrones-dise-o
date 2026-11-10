@@ -1,0 +1,32 @@
+### PRUEBA
+Documento documentoEstudiante = new ProxyDocumento("Calificaciones.pdf", "ESTUDIANTE");
+documentoEstudiante.mostrar();
+### ESPERADO
+Acceso denegado para el rol: ESTUDIANTE
+### PRUEBA
+Documento documentoDocente = new ProxyDocumento("Calificaciones.pdf", "DOCENTE");
+documentoDocente.mostrar();
+### ESPERADO
+Cargando documento: Calificaciones.pdf
+Mostrando contenido de: Calificaciones.pdf
+### PRUEBA
+Documento documento = new ProxyDocumento("Actas.pdf", "administrador");
+documento.mostrar();
+documento.mostrar();
+### ESPERADO
+Cargando documento: Actas.pdf
+Mostrando contenido de: Actas.pdf
+Mostrando contenido de: Actas.pdf
+### PRUEBA
+Documento documento = new ProxyDocumento("Actas.pdf", "Docente");
+System.out.println("Proxy creado");
+documento.mostrar();
+### ESPERADO
+Proxy creado
+Cargando documento: Actas.pdf
+Mostrando contenido de: Actas.pdf
+### PRUEBA
+Documento documento = new ProxyDocumento("Notas.pdf", null);
+documento.mostrar();
+### ESPERADO
+Acceso denegado para el rol: null
